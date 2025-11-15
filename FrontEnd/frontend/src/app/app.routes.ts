@@ -6,8 +6,10 @@ import { CoursesComponent } from './pages/courses/courses';
 import { LoginComponent } from './pages/login/login';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', component: HomeComponent },          // Main page
   { path: 'students', component: StudentsComponent },
   { path: 'courses', component: CoursesComponent },
   { path: 'login', component: LoginComponent },
+  // route n'exist pas -> return home
+  { path: '**', redirectTo: '' },
 ];
