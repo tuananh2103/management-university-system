@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { CommonModule } from '@angular/common';
+import { CafeItem } from './cafeteria.model';
 import { CafeteriaComponent } from './cafeteria';
 
 describe('Cafeteria', () => {

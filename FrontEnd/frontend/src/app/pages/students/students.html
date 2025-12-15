@@ -1,1 +1,47 @@
-<p>students works!</p>
+<section class="students">
+  <div class="page-header">
+    <h1>List student </h1>
+
+    <div class="toolbar">
+      <input
+        type="text"
+        placeholder="Student ID"
+        disabled
+      />
+      <button class="btn-primary" disabled> + Add students</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>fullName</th>
+          <th>major</th>
+          <th>year</th>
+          <th>status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let s of students">
+          <td>{{ s.studentCode }}</td>
+          <td>{{ s.fullName }}</td>
+          <td>{{ s.major }}</td>
+          <td>year {{ s.year }}</td>
+          <td>
+            <span
+              class="status"
+              [class.active]="s.status === 'ACTIVE'"
+              [class.inactive]="s.status === 'INACTIVE'"
+            >
+              {{ s.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+

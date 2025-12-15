@@ -1,1 +1,113 @@
-<p>home works!</p>
+<!DOCTYPE html>
+<html lang="en">
+<section class = "home">
+    <div class = "hero" >
+        <p class = "badge"> University Management </p>
+        <h1 class = "title"> Welcome to University Management System </h1>
+        <p class = "subtitle"> Manage your university with ease and efficiency </p>
+        <div class ="actions"> 
+            <a class = "btn btn-primary" routerLink="/students"> Students decks </a>
+            <a class = "btn btn-secondary" routerLink="/courses"> Courses and timetable </a>
+
+        </div>
+        <div class = "meta">
+
+            <div class = "meta-item">
+                <span class = "meta-label">Version</span>
+                <span class = "meta-value">1.0.0(Beta testing)</span>
+            </div>
+
+            <div class = "meta-item">
+                <span class = "meta-label">Last Updated</span>
+                <span class = "meta-value">Decembre 2025</span>
+            </div>
+
+            <div class = "meta-item">
+                <span class = "meta-label">Developed by</span>
+                <span class = "meta-value">TuanAnh_backend </span>
+            </div>
+        </div> 
+    
+        <div class = "hero__panel">
+            <h2 class = "panel__title">Join now</h2>
+            <div class = "cards">
+
+                <a class = "card" routerLink="/students">
+                    <div class ="card__title"> Students </div>
+                    <div class ="card__description"> Manage student information, enrollment, and academic records. </div>
+                </a>
+
+                <a class = "card" routerLink="/courses">
+                    <div class ="card__title"> Courses </div>
+                    <div class ="card__description"> Manage course offerings, schedules, and instructors. </div>
+                </a>
+
+                <a class = "card" routerLink="/cafeteria">
+                    <div class ="card__title"> Cafeteria </div>
+                    <div class ="card__description"> Manage cafeteria menus, orders, and payments. </div>
+                </a>
+
+                <a class = "card" routerLink="/library">
+                    <div class ="card__title"> Library </div>
+                    <div class ="card__description"> Manage library resources, borrowing, and returns. </div>
+                </a>
+                
+                <a class = "card" routerLink="/login">
+                    <div class ="card__title"> Connect </div>
+                    <div class ="card__description"> Admin/Staff/Student </div>
+                </a>
+
+                <a class = "card card--disabled" href ="#" (click) ="$event.preventDefault()">
+                    <div class ="card__title"> More features coming soon </div>
+                    <div class ="card__description"> Stay tuned for updates! </div>
+                </a>
+
+            </div>
+        </div>
+    </div>
+    <!-- Summary -->
+    <div class ="grid">
+        <div class ="box">
+            <div class ="box__header">
+                <h3 class ="box__title"> Announcement </h3>
+                <span class ="box__hint"> Latest news and updates </span>
+            </div>
+
+            <ul class ="box__list">
+                <li class ="box__item">
+                    <span class ="item__title">Semester 2 plan has been updated</span>
+                    <span class ="item__meta"> Training Department  • 2 hours ago</span>
+                </li>
+                <li class ="box__item">
+                    <span class ="item__title">New library resources available</span>
+                    <span class ="item__meta"> Library Team  • 1 day ago</span>
+                </li>
+                <li class ="box__item">
+                    <span class ="item__title">Cafeteria menu updated for the week</span>
+                    <span class ="item__meta"> Cafeteria Staff  • 3 days ago</span>
+                </li>
+            </ul>
+        </div>
+        <div class ="box">
+            <div class ="box__header">
+                <h3 class ="box__title"> Events coming soon </h3>
+                <span class ="box__hint"> Don't miss out! </span>
+            </div>
+
+            <div class ="schedule">
+                <div class ="schedule__item">
+                    <span class ="item__date">25 Dec 2025</span>
+                    <span class ="item__event">Christmas Celebration</span>
+                </div>
+                <div class ="schedule__item">
+                    <span class ="item__date">10 Jan 2026</span>
+                    <span class ="item__event">New Semester Orientation</span>
+                </div>
+                <div class ="schedule__item">
+                    <span class ="item__date">14 Feb 2026</span>
+                    <span class ="item__event">Valentine's Day Social</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

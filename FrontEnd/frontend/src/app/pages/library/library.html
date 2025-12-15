@@ -1,0 +1,40 @@
+<section class="library">
+  <div class="page-header">
+    <h1>Thư viện</h1>
+
+    <div class="toolbar">
+      <input type="text" placeholder="Tìm theo tên sách / tác giả / ISBN" disabled />
+      <button class="btn-primary" disabled>+ Add book</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ISBN</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Category</th>
+          <th>Pulished Year</th>
+          <th>Available</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let b of books">
+          <td class="mono">{{ b.isbn }}</td>
+          <td class="title">{{ b.title }}</td>
+          <td>{{ b.author }}</td>
+          <td>{{ b.category }}</td>
+          <td>{{ b.publishedYear }}</td>
+          <td>
+            <span class="status" [class.available]="b.available" [class.borrowed]="!b.available">
+              {{ b.available ? 'AVAILABLE' : 'BORROWED' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

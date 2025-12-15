@@ -1,0 +1,36 @@
+<section class="cafe">
+  <div class="page-header">
+    <h1>Campus Café</h1>
+    <p class="subtitle">Menu today</p>
+  </div>
+
+  <div class="menu">
+    <div
+      class="card"
+      *ngFor="let item of cafeItems"
+      [class.unavailable]="!item.available"
+    >
+      <div class="card-header">
+        <span class="category">{{ item.category }}</span>
+        <span
+          class="status"
+          [class.on]="item.available"
+          [class.off]="!item.available"
+        >
+          {{ item.available ? 'AVAILABLE' : 'SOLD OUT' }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <h3>{{ item.name }}</h3>
+        <p class="price">{{ formatPrice(item.price) }}</p>
+      </div>
+
+      <div class="card-footer">
+        <button [disabled]="!item.available">
+          Đặt món
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
