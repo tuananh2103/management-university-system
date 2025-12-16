@@ -1,1 +1,44 @@
-<p>courses works!</p>
+<section class = "courses">
+    <div class="page-header">
+        <h1>Course Catalog</h1>
+        
+        <div class ="toolbar">
+            <input type = "text" placeholder="Search courses..." [(ngModel)]="search" /> 
+            <button class = "btn-primary" (click)="onAddCourse()" disabled >Add Course</button>
+           
+        </div>
+
+        <div class ="table-wrapper"> 
+            <table> 
+                <thead> 
+                    <th>ID courses</th>
+                    <th>Courses Title</th>
+                    <th>Credits</th>
+                    <th>Teachers</th>
+                    <th>Semester</th>
+                    <th>Status</th>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor = "let courses of filteredCourses">
+                        <td class ="mono">{{ courses.courseCode }} </td>
+                        <td class ="title">{{ courses.title}}</td>
+                        <td>{{courses.credits}}</td>
+                        <td>{{courses.teachers}}</td>
+                        <td>S {{courses.semester}}</td>
+                        <td>
+                            <span class ="status" [class.open] = "courses.status === 'OPEN'" [class.closed] = "courses.status === 'CLOSED'">
+                                {{courses.status}}
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr *ngIf = "filteredCourses.length ===0">
+                        <td class = "empty" colspan ="6">No found this courseCode</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+</section>

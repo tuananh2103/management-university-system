@@ -24,7 +24,7 @@ export class CafeteriaComponent {
       name: 'Green Tea',
       description: 'Freshly brewed green tea',
       category: 'TEA',
-      price: 2.0,
+      price: 2.1,
       available: true,
     },
     {
@@ -46,6 +46,6 @@ export class CafeteriaComponent {
   ];
 
     formatPrice(price: number): string {
-    return price.toLocaleString('vi-VN') + ' ₫';
+    return price.toLocaleString('euro-EUR') + ' €';
   }
 }

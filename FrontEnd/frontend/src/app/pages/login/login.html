@@ -1,1 +1,57 @@
-<p>login works!</p>
+<section class="login">
+  <div class="card">
+    <div class="header">
+      <h1>Login</h1>
+      <p>Connect to get more features</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          placeholder="Ví dụ: admin"
+          [class.invalid]="username.touched && username.invalid"
+        />
+        <div class="hint" *ngIf="username.touched && username.invalid">
+          <span *ngIf="username.errors?.['required']">Username là bắt buộc.</span>
+          <span *ngIf="username.errors?.['minlength']">Username tối thiểu 3 ký tự.</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          [class.invalid]="password.touched && password.invalid"
+        />
+        <div class="hint" *ngIf="password.touched && password.invalid">
+          <span *ngIf="password.errors?.['required']">Password là bắt buộc.</span>
+          <span *ngIf="password.errors?.['minlength']">Password tối thiểu 6 ký tự.</span>
+        </div>
+      </div>
+
+      <div class="alert" *ngIf="status === 'ERROR'">
+        {{ errorMessage }}
+      </div>
+
+      <div class="alert success" *ngIf="status === 'SUCCESS'">
+        Đăng nhập thành công (mock). Bước sau sẽ redirect vào dashboard.
+      </div>
+
+      <button class="btn" type="submit" [disabled]="status === 'LOADING'">
+        <span *ngIf="status !== 'LOADING'">Đăng nhập</span>
+        <span *ngIf="status === 'LOADING'">Đang xử lý...</span>
+      </button>
+
+      <div class="note">
+        <strong>Demo:</strong> username <code>admin</code> / password <code>admin123</code>
+      </div>
+    </form>
+  </div>
+</section>
