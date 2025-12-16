@@ -4,6 +4,7 @@ import { CafeItem } from './cafeteria.model';
 
 @Component({
   selector: 'app-courses',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './cafeteria.html',
   styleUrl: './cafeteria.scss',

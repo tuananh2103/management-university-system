@@ -12,8 +12,8 @@ export const routes: Routes = [
   { path: 'students', component: StudentsComponent },
   { path: 'courses', component: CoursesComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'Restaurant', component: CafeteriaComponent },
-  { path: 'Library', component: LibraryComponent },
+  { path: 'cafeteria', component: CafeteriaComponent },
+  { path: 'library', component: LibraryComponent },
   // route n'exist pas -> return home
   { path: '**', redirectTo: '' },
 ];
