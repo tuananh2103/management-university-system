@@ -12,12 +12,12 @@
           id="username"
           type="text"
           formControlName="username"
-          placeholder="Ví dụ: admin"
+          placeholder="Example: admin"
           [class.invalid]="username.touched && username.invalid"
         />
         <div class="hint" *ngIf="username.touched && username.invalid">
-          <span *ngIf="username.errors?.['required']">Username là bắt buộc.</span>
-          <span *ngIf="username.errors?.['minlength']">Username tối thiểu 3 ký tự.</span>
+          <span *ngIf="username.errors?.['required']">Username is required</span>
+          <span *ngIf="username.errors?.['minlength']">Username minimun length is 3</span>
         </div>
       </div>
 
@@ -31,8 +31,8 @@
           [class.invalid]="password.touched && password.invalid"
         />
         <div class="hint" *ngIf="password.touched && password.invalid">
-          <span *ngIf="password.errors?.['required']">Password là bắt buộc.</span>
-          <span *ngIf="password.errors?.['minlength']">Password tối thiểu 6 ký tự.</span>
+          <span *ngIf="password.errors?.['required']">Password is required</span>
+          <span *ngIf="password.errors?.['minlength']">Password minimum length is 6</span>
         </div>
       </div>
 
@@ -41,12 +41,12 @@
       </div>
 
       <div class="alert success" *ngIf="status === 'SUCCESS'">
-        Đăng nhập thành công (mock). Bước sau sẽ redirect vào dashboard.
+        Login successful (mock). The next step will redirect to the dashboard.
       </div>
 
       <button class="btn" type="submit" [disabled]="status === 'LOADING'">
-        <span *ngIf="status !== 'LOADING'">Đăng nhập</span>
-        <span *ngIf="status === 'LOADING'">Đang xử lý...</span>
+        <span *ngIf="status !== 'LOADING'">Login</span>
+        <span *ngIf="status === 'LOADING'">Processing...</span>
       </button>
 
       <div class="note">
