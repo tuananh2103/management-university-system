@@ -44,6 +44,7 @@ export class CoursesComponent implements OnInit {
   message = '';
 
   ngOnInit() {
+    this.semester = this.inferSemesterFromRegNumber(this.regNumber);
     this.loadSemester();
   }
 
@@ -64,6 +65,12 @@ export class CoursesComponent implements OnInit {
       this.selected.delete(courseCode);
     }
   }
+  // Triggered when the registration number input changes
+  onRegNumberChange() {
+  this.semester = this.inferSemesterFromRegNumber(this.regNumber);
+  this.loadSemester();
+  }
+
 
   /** Registration stored for the current student/semester (if any). */
   get registered() {
@@ -139,6 +146,28 @@ export class CoursesComponent implements OnInit {
         teacher.toLowerCase().includes(q)
       )
     );
+  }
+  /** Infer semester from registration number (e.g. SP21-BCS-066). */
+  inferSemesterFromRegNumber(regNumber: string): number {
+  if (!regNumber) return 1;
+
+  // Expect format like FA21-XXX or SP21-XXX
+  const match = regNumber.match(/^(FA|SP)(\d{2})/);
+  if (!match) return 1;
+
+  const term = match[1];          // FA or SP
+  const year = parseInt(match[2], 10); // 21, 22, ...
+
+  const baseYear = 21;
+  const baseSemester = term === 'FA' ? 1 : 2;
+
+  const semester = baseSemester + (year - baseYear) * 2;
+
+  // Safety clamp: backend supports only 1..8
+  if (semester < 1) return 1;
+  if (semester > 8) return 8;
+
+  return semester;
   }
 
   /** Placeholder for adding a new course via UI - currently logs to console. */
