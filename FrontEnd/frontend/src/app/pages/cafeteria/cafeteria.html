@@ -5,11 +5,8 @@
   </div>
 
   <div class="menu">
-    <div
-      class="card"
-      *ngFor="let item of cafeItems"
-      [class.unavailable]="!item.available"
-    >
+    <div class="card" *ngFor="let item of cafeItems" [class.unavailable]="!item.available">
+
       <div class="card-header">
         <span class="category">{{ item.category }}</span>
         <span

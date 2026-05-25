@@ -7,7 +7,7 @@
   <div class="toolbar">
     <div class="field">
       <label>Reg Number</label>
-      <input [(ngModel)]="regNumber" />
+      <input [(ngModel)]="regNumber" (change)="onRegNumberChange()" />
     </div>
 
     <div class="field">
