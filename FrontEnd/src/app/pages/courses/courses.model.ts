@@ -8,18 +8,26 @@
  * - credits: credit weight of the course.
  * - teachers: list of teacher names or 'HYBRID' if online/hybrid.
  * - semester: semester number the course is offered in (1..8).
- * - lectureHours: optional number of lecture hours per week.
- * - labHours: optional number of lab/tutorial hours per week.
- * - status: optional availability flag; 'OPEN' means students can register.
- */
+ **/ 
 export interface Course {
   id: number;
   courseCode: string;
   title: string;
   credits: number;
+  lectureHours: number;
+  labHours: number;
   teachers: string[];
   semester: number;
-  lectureHours?: number;
-  labHours?: number;
-  status?: 'OPEN' | 'CLOSED';
+}
+export interface CourseRegistration {
+  regNumber: string;
+  semester: number;
+  courseIds: number[];
+  createdAt: string;
+}
+
+export interface RegisterCoursesRequest {
+  regNumber: string;
+  semester: number;
+  courseIds: number[];
 }

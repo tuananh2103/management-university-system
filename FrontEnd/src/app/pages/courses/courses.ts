@@ -1,10 +1,3 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Course } from './courses.model';
-import { CourseRegistrationStore } from './courses-registration.store';
-import { COURSES_BY_SEMESTER } from './courses.data';
-
 /**
  * Main component for the Courses page. This standalone component shows
  * a list of offered courses for a selected semester and allows the
@@ -14,164 +7,234 @@ import { COURSES_BY_SEMESTER } from './courses.data';
  * - The component uses `CourseRegistrationStore` which persists to
  *   `localStorage` for demo purposes only.
  */
+
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+
+import { Course, CourseRegistration } from './courses.model';
+import { CoursesApiService } from './courses.api.service';
+import { RegistrationsApiService } from './registrations.api.service';
+
 @Component({
   selector: 'app-courses',
-  standalone: true, // stand alone component no need NgModule,import dependency direct in component
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './courses.html',
   styleUrl: './courses.scss',
 })
 export class CoursesComponent implements OnInit {
-  // Example student registration number used for demo purposes
   regNumber = 'SP21-BCS-066';
 
-  /** Search query used to filter the course list */
-  search: string = '';
-
-  /** The currently selected semester */
   semester = 1;
+  semesters = [1, 2, 3, 4, 5, 6, 7, 8];
 
-  /** Courses available for the selected semester */
+  search = '';
+
   courses: Course[] = [];
+  selectedCourseIds = new Set<number>();
 
-  /** Set of selected course ids */
-  selected = new Set<number>();
+  registration: CourseRegistration | null = null;
 
-  /** Error message shown in the UI when something goes wrong */
+  loading = false;
+  registrationLoading = false;
+
   error = '';
-
-  /** Informational message shown in the UI on success */
   message = '';
 
-  ngOnInit() {
-    this.semester = this.inferSemesterFromRegNumber(this.regNumber);
+  constructor(
+    private coursesApi: CoursesApiService,
+    private registrationsApi: RegistrationsApiService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
     this.loadSemester();
   }
 
-  /** Load the courses for the currently selected semester. */
-  private loadSemester() {
-    this.courses = COURSES_BY_SEMESTER[this.semester] ?? [];
-  }
-
-  /**
-   * Toggle selection of a course id.
-   * @param courseCode id of the course
-   * @param checked whether the checkbox is checked
-   */
-  toggleCourse(courseCode: number, checked: boolean) {
-    if (checked) {
-      this.selected.add(courseCode);
-    } else {
-      this.selected.delete(courseCode);
-    }
-  }
-  // Triggered when the registration number input changes
-  onRegNumberChange() {
-  this.semester = this.inferSemesterFromRegNumber(this.regNumber);
-  this.loadSemester();
-  }
-
-
-  /** Registration stored for the current student/semester (if any). */
-  get registered() {
-    return CourseRegistrationStore.get(this.regNumber, this.semester);
-  }
-
-  /** Returns the list of Course objects that the student has registered for. */
-  get registeredCourses(): Course[] {
-    const reg = this.registered;
-    if (!reg) {
-      return [];
-    }
-    const set = new Set(reg.courseIds);
-    return this.courses.filter((course: Course) => set.has(course.id));
-  }
-
-  /**
-   * Validate current selection and persist the registration via the store.
-   * Validation rules in this demo:
-   * - student cannot register twice for the same semester
-   * - must select at least 4 courses
-   * - all selected ids must be offered this semester
-   */
-  registerSelected() {
-    this.message = '';
+  loadSemester(): void {
+    this.loading = true;
     this.error = '';
-    try {
-      // Check if already registered
-      if (CourseRegistrationStore.has(this.regNumber, this.semester)) {
-        throw new Error('You have already registered for this semester.');
-      }
-      // validate minimum 4 courses
-      const ids = Array.from(this.selected);
-      const uniqueID = Array.from(new Set(ids));
-      if (this.selected.size < 4) {
-        throw new Error('You must select at least 4 courses.');
-      }
-      // validate id no duplicate
-      const offeredIds = new Set(this.courses.map(c => c.id));
-      const invalid = uniqueID.find(id => !offeredIds.has(id));
-      if (invalid !== undefined) {
-        throw new Error(`Invalid course ID selected: ${invalid}`);
-      }
-      CourseRegistrationStore.save({
-        studentRegNumber: this.regNumber,
-        semester: this.semester,
-        courseIds: uniqueID,
-        createdAt: new Date().toISOString(),
-      });
-      this.message = 'Courses registered successfully.';
-      this.selected.clear();
-    } catch (err: any) {
-      this.error = err.message;
+    this.message = '';
+    this.registration = null;
+    this.selectedCourseIds = new Set<number>();
+
+    this.coursesApi.getCoursesBySemester(this.semester).subscribe({
+      next: (data) => {
+        this.courses = data;
+        this.loading = false;
+        this.loadRegistration();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.error = 'Failed to load courses from backend.';
+        this.courses = [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  loadRegistration(): void {
+    const regNumber = this.regNumber.trim();
+
+    if (!regNumber) {
+      this.registration = null;
       return;
     }
+
+    this.registrationLoading = true;
+
+    this.registrationsApi
+      .getRegistration(regNumber, this.semester)
+      .subscribe({
+        next: (registration) => {
+          this.registration = registration;
+          this.registrationLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 404) {
+            this.registration = null;
+          } else {
+            this.error = 'Failed to load registration.';
+          }
+
+          this.registrationLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 
-  /** Clear stored registration for the current student/semester. */
-  clearRegistration() {
-    CourseRegistrationStore.clear(this.regNumber, this.semester);
-    this.message = 'Registration cleared (local only).';
+  onRegNumberChange(): void {
     this.error = '';
+    this.message = '';
+    this.selectedCourseIds = new Set<number>();
+    this.loadRegistration();
   }
 
-  /** Filter the course list according to the `search` query. */
+  toggleCourse(courseId: number, checked: boolean): void {
+    const nextSelected = new Set(this.selectedCourseIds);
+
+    if (checked) {
+      nextSelected.add(courseId);
+    } else {
+      nextSelected.delete(courseId);
+    }
+
+    this.selectedCourseIds = nextSelected;
+  }
+
+  isSelected(courseId: number): boolean {
+    return this.selectedCourseIds.has(courseId);
+  }
+
+  registerSelected(): void {
+    this.error = '';
+    this.message = '';
+
+    const regNumber = this.regNumber.trim();
+
+    if (!regNumber) {
+      this.error = 'Registration number is required.';
+      return;
+    }
+
+    if (this.registration) {
+      this.error = 'This student has already registered courses for this semester.';
+      return;
+    }
+
+    const courseIds = Array.from(this.selectedCourseIds);
+
+    if (courseIds.length < 4) {
+      this.error = 'You must select at least 4 courses.';
+      return;
+    }
+
+    this.registrationLoading = true;
+
+    this.registrationsApi
+      .registerCourses({
+        regNumber,
+        semester: this.semester,
+        courseIds,
+      })
+      .subscribe({
+        next: (registration) => {
+          this.registration = registration;
+          this.selectedCourseIds = new Set<number>();
+          this.message = 'Courses registered successfully.';
+          this.registrationLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err: HttpErrorResponse) => {
+          this.error =
+            err.error?.message ||
+            err.error?.detail ||
+            'Failed to register courses.';
+
+          this.registrationLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  clearRegistration(): void {
+    this.error = '';
+    this.message = '';
+
+    const regNumber = this.regNumber.trim();
+
+    if (!regNumber) {
+      this.error = 'Registration number is required.';
+      return;
+    }
+
+    this.registrationLoading = true;
+
+    this.registrationsApi
+      .deleteRegistration(regNumber, this.semester)
+      .subscribe({
+        next: () => {
+          this.registration = null;
+          this.selectedCourseIds = new Set<number>();
+          this.message = 'Registration cleared.';
+          this.registrationLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Failed to clear registration.';
+          this.registrationLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
   get filteredCourses(): Course[] {
     const q = this.search.trim().toLowerCase();
 
-    return this.courses.filter((course: Course) =>
-      course.courseCode.toLowerCase().includes(q) ||
-      course.title.toLowerCase().includes(q) ||
-      course.teachers.some((teacher: string) =>
-        teacher.toLowerCase().includes(q)
-      )
-    );
-  }
-  /** Infer semester from registration number (e.g. SP21-BCS-066). */
-  inferSemesterFromRegNumber(regNumber: string): number {
-  if (!regNumber) return 1;
+    if (!q) {
+      return this.courses;
+    }
 
-  // Expect format like FA21-XXX or SP21-XXX
-  const match = regNumber.match(/^(FA|SP)(\d{2})/);
-  if (!match) return 1;
-
-  const term = match[1];          // FA or SP
-  const year = parseInt(match[2], 10); // 21, 22, ...
-
-  const baseYear = 21;
-  const baseSemester = term === 'FA' ? 1 : 2;
-
-  const semester = baseSemester + (year - baseYear) * 2;
-
-  // Safety clamp: backend supports only 1..8
-  if (semester < 1) return 1;
-  if (semester > 8) return 8;
-
-  return semester;
+    return this.courses.filter((course) => {
+      return (
+        course.courseCode.toLowerCase().includes(q) ||
+        course.title.toLowerCase().includes(q) ||
+        course.teachers.join(' ').toLowerCase().includes(q)
+      );
+    });
   }
 
-  /** Placeholder for adding a new course via UI - currently logs to console. */
-  onAddCourse() {
-    console.log('Add Course button clicked');
+  get registeredCourses(): Course[] {
+    if (!this.registration) {
+      return [];
+    }
+
+    const registeredIds = new Set(this.registration.courseIds);
+
+    return this.courses.filter((course) => registeredIds.has(course.id));
   }
 }

@@ -1,33 +1,79 @@
 <section class="courses">
   <div class="page-header">
     <h1>Course Registration</h1>
-    <p class="muted">Mock flow (LocalStorage). Later we will connect to Java backend.</p>
+    <p class="muted">Courses and registrations are loaded from Spring Boot backend API.</p>
   </div>
 
   <div class="toolbar">
     <div class="field">
       <label>Reg Number</label>
-      <input [(ngModel)]="regNumber" (change)="onRegNumberChange()" />
+      <input
+        type="text"
+        [(ngModel)]="regNumber"
+        (change)="onRegNumberChange()"
+        placeholder="Example: SP21-BCS-066"
+      />
     </div>
 
     <div class="field">
       <label>Semester</label>
-      <select [(ngModel)]="semester" (change)="ngOnInit()">
-        <option *ngFor="let s of [1,2,3,4,5,6,7,8]" [value]="s">Semester {{ s }}</option>
+      <select [(ngModel)]="semester" (change)="loadSemester()">
+        <option *ngFor="let s of semesters" [value]="s">
+          Semester {{ s }}
+        </option>
       </select>
     </div>
 
-    <button class="btn-primary" (click)="registerSelected()">Register</button>
-    <button class="btn-ghost" (click)="clearRegistration()">Clear</button>
+    <div class="field search-field">
+      <label>Search</label>
+      <input
+        type="text"
+        [(ngModel)]="search"
+        placeholder="Search by code, title, or teacher..."
+      />
+    </div>
+
+    <button
+      class="btn-primary"
+      (click)="registerSelected()"
+      [disabled]="registrationLoading || !!registration"
+    >
+      Register
+    </button>
+
+    <button
+      class="btn-ghost"
+      (click)="clearRegistration()"
+      [disabled]="registrationLoading || !registration"
+    >
+      Clear
+    </button>
   </div>
 
-  <div class="alert error" *ngIf="error">{{ error }}</div>
-  <div class="alert success" *ngIf="message">{{ message }}</div>
+  <div class="alert error" *ngIf="error">
+    {{ error }}
+  </div>
 
-  <div class="grid">
-    <!-- Offered -->
+  <div class="alert success" *ngIf="message">
+    {{ message }}
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    Loading courses...
+  </div>
+
+  <div class="loading" *ngIf="registrationLoading">
+    Processing registration...
+  </div>
+
+  <div class="grid" *ngIf="!loading && !error">
     <div class="box">
       <div class="box-title">Offered Courses</div>
+
+      <div class="hint" *ngIf="registration">
+        This student has already registered courses for this semester.
+        Clear it if you want to test again.
+      </div>
 
       <div class="table-wrapper">
         <table>
@@ -38,38 +84,60 @@
               <th>Code</th>
               <th>Title</th>
               <th>Credits</th>
-              <th>Teacher</th>
+              <th>Lecture</th>
+              <th>Lab</th>
+              <th>Teachers</th>
             </tr>
           </thead>
+
           <tbody>
-            <tr *ngFor="let c of courses">
+            <tr *ngFor="let c of filteredCourses">
               <td>
-                <input type="checkbox" (change)="toggleCourse(c.id, $any($event.target).checked)" />
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(c.id)"
+                  [disabled]="!!registration"
+                  (change)="toggleCourse(c.id, $any($event.target).checked)"
+                />
               </td>
+
               <td class="mono">{{ c.id }}</td>
               <td class="mono">{{ c.courseCode }}</td>
               <td>{{ c.title }}</td>
               <td>{{ c.credits }}</td>
-              <td>{{ c.teachers }}</td>
+              <td>{{ c.lectureHours }}</td>
+              <td>{{ c.labHours }}</td>
+              <td>{{ c.teachers.join(', ') }}</td>
             </tr>
 
-            <tr *ngIf="courses.length === 0">
-              <td colspan="6" class="empty">No offered courses for this semester (mock data missing).</td>
+            <tr *ngIf="filteredCourses.length === 0">
+              <td colspan="8" class="empty">
+                No courses found.
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="hint">Note: Course ID here is the line index (0..n-1), same as your Java console logic.</div>
+      <div class="hint">
+        You must select at least 4 courses before registering.
+      </div>
     </div>
 
-    <!-- Registered -->
     <div class="box">
       <div class="box-title">Registered Courses</div>
 
-      <div *ngIf="!registered" class="muted">No registration found for this semester.</div>
+      <div *ngIf="!registration" class="muted">
+        No registration found for this student and semester.
+      </div>
 
-      <div *ngIf="registered" class="table-wrapper">
+      <div *ngIf="registration" class="registration-info">
+        <div><strong>Reg Number:</strong> {{ registration.regNumber }}</div>
+        <div><strong>Semester:</strong> {{ registration.semester }}</div>
+        <div><strong>Saved at:</strong> {{ registration.createdAt }}</div>
+      </div>
+
+      <div *ngIf="registration" class="table-wrapper">
         <table>
           <thead>
             <tr>
@@ -77,23 +145,20 @@
               <th>Code</th>
               <th>Title</th>
               <th>Credits</th>
-              <th>Teacher</th>
+              <th>Teachers</th>
             </tr>
           </thead>
+
           <tbody>
             <tr *ngFor="let c of registeredCourses">
               <td class="mono">{{ c.id }}</td>
               <td class="mono">{{ c.courseCode }}</td>
               <td>{{ c.title }}</td>
               <td>{{ c.credits }}</td>
-              <td>{{ c.teachers }}</td>
+              <td>{{ c.teachers.join(', ') }}</td>
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div *ngIf="registered" class="hint">
-        Saved at: {{ registered.createdAt }}
       </div>
     </div>
   </div>
