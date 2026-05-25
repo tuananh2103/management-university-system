@@ -32,9 +32,6 @@ export class LoginComponent{
     });
    }
   
-
- 
-
   submit() : void {
     this.errorMessage = '';
     if (this.form.invalid) {

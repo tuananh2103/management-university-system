@@ -1,59 +1,99 @@
-# Frontend
+# 🎓 University Management System – Frontend (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.4.
+## 1. Overview
 
-## Development server
+This repository contains the **Frontend** of the *University Management System*, built with **Angular (v17+)** using **Standalone Components**.
 
-To start a local development server, run:
+The frontend is responsible for:
+- Rendering the user interface (UI)
+- Handling navigation (routing)
+- Managing forms and validations
+- Preparing integration with a Java backend (Spring Boot – next phase)
 
-```bash
-ng serve
-```
+---
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 2. Tech Stack
 
-## Code scaffolding
+- **Angular 17+**
+- **TypeScript (strict mode enabled)**
+- **Standalone Components architecture**
+- **SCSS**
+- **Angular Router**
+- **Reactive Forms & Template-driven Forms**
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
+## 3. Project Structure
+├── app/
+│ ├── pages/
+│ │ ├── home/ # Main dashboard
+│ │ ├── students/ # Students management
+│ │ ├── courses/ # Courses management
+│ │ ├── library/ # Library management
+│ │ ├── cafe/ # Campus café
+│ │ └── login/ # Authentication
+│ │
+│ ├── app.routes.ts # Application routes
+│ ├── app.ts # Root component
+│ ├── app.html # Main layout (navbar + router-outlet)
+│ └── app.scss # Global app styles
+│
+├── styles.scss # Global styles
+└── main.ts # Application bootstrap
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-```bash
-ng generate --help
-```
+---
 
-## Building
+## 4. Why Standalone Components?
 
-To build the project run:
+### What are Standalone Components?
 
-```bash
-ng build
-```
+Standalone Components are an Angular architecture (introduced in Angular 14+) that removes the need for `NgModule`.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Why this approach?
+- Cleaner and more readable code
+- Better separation of concerns
+- Easier maintenance and scalability
+- Official **Angular recommended architecture**
+- Well-suited for **microservices-based backends**
 
-## Running unit tests
+Example:
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+```ts
+@Component({
+  standalone: true,
+  imports: [CommonModule],
+})
+export class StudentsComponent {}
 
-```bash
-ng test
-```
+## 5. Why Using that Components?
 
-## Running end-to-end tests
+import { CommonModule } from '@angular/common'; 
+//required when using *ngIf,*ngFor,[ngClass] and common pipes(date,uppercase,etc)
+import { FormsModule } from '@angular/forms'; 
+//Used for template-driven forms, such as:Search input, simple filters , Lightweight forms
+import { ReactiveFormsModule } from '@angular/forms';
+//Used for critical forms: Login, Registration, Forms with validation rules, Backend-bound forms
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+//Used of page navigation,SPA behavior,Layout rendering via <router-oulet>
 
-For end-to-end (e2e) testing, run:
 
-```bash
-ng e2e
-```
+## 6. Routing Configuration
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+export const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'students', component: StudentsComponent },
+  { path: 'courses', component: CoursesComponent },
+  { path: 'library', component: LibraryComponent },
+  { path: 'cafe', component: CafeComponent },
+  { path: 'login', component: LoginComponent },
+  { path: '**', redirectTo: '' },
+];
+Each route maps directly to a Standalone Component.
 
-## Additional Resources
+## 7. Models (Interfaces) // file .model.ts
+Why models are important: Strong typing, Easier backend integration, Prevent runtime errors, Cleaner and self-documented code
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Attention How to Run the Project
+npm install
+ng serve -o
