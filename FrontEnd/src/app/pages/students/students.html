@@ -1,47 +1,170 @@
 <section class="students">
   <div class="page-header">
-    <h1>List student </h1>
+    <h1>Students</h1>
+    <p class="muted">Students are loaded from Spring Boot backend API.</p>
+  </div>
 
-    <div class="toolbar">
-      <input
-        type="text"
-        placeholder="Student ID"
-        disabled
-      />
-      <button class="btn-primary" disabled> + Add students</button>
+  <div class="grid">
+    <!-- Form -->
+    <div class="box">
+      <div class="box-title">
+        {{ editingId === null ? 'Add Student' : 'Edit Student' }}
+      </div>
+
+      <form (ngSubmit)="submitForm()" class="student-form">
+        <div class="field">
+          <label>Student Code</label>
+          <input
+            type="text"
+            name="studentCode"
+            [(ngModel)]="form.studentCode"
+            placeholder="Example: STU004"
+          />
+        </div>
+
+        <div class="field">
+          <label>Full Name</label>
+          <input
+            type="text"
+            name="fullName"
+            [(ngModel)]="form.fullName"
+            placeholder="Student full name"
+          />
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="form.email"
+            placeholder="student@university.com"
+          />
+        </div>
+
+        <div class="field">
+          <label>Major</label>
+          <input
+            type="text"
+            name="major"
+            [(ngModel)]="form.major"
+            placeholder="Computer Science"
+          />
+        </div>
+
+        <div class="field">
+          <label>Year</label>
+          <select name="year" [(ngModel)]="form.year">
+            <option *ngFor="let y of years" [value]="y">
+              Year {{ y }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select name="status" [(ngModel)]="form.status">
+            <option *ngFor="let status of statuses" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit" [disabled]="saving">
+            {{ editingId === null ? 'Create' : 'Update' }}
+          </button>
+
+          <button
+            class="btn-ghost"
+            type="button"
+            *ngIf="editingId !== null"
+            (click)="cancelEdit()"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <div class="box">
+      <div class="box-title">Student List</div>
+
+      <div class="toolbar">
+        <div class="field search-field">
+          <label>Search</label>
+          <input
+            type="text"
+            [(ngModel)]="search"
+            placeholder="Search by name, code, email..."
+          />
+        </div>
+
+        <button class="btn-ghost" type="button" (click)="loadStudents()">
+          Refresh
+        </button>
+      </div>
+
+      <div class="alert error" *ngIf="error">
+        {{ error }}
+      </div>
+
+      <div class="alert success" *ngIf="message">
+        {{ message }}
+      </div>
+
+      <div class="loading" *ngIf="loading">
+        Loading students...
+      </div>
+
+      <div class="table-wrapper" *ngIf="!loading">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Code</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Major</th>
+              <th>Year</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let student of filteredStudents">
+              <td class="mono">{{ student.id }}</td>
+              <td class="mono">{{ student.studentCode }}</td>
+              <td>{{ student.fullName }}</td>
+              <td>{{ student.email }}</td>
+              <td>{{ student.major }}</td>
+              <td>{{ student.year }}</td>
+              <td>
+                <span class="badge" [class.inactive]="student.status === 'INACTIVE'">
+                  {{ student.status }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-small" type="button" (click)="startEdit(student)">
+                  Edit
+                </button>
+
+                <button class="btn-small danger" type="button" (click)="deleteStudent(student.id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="filteredStudents.length === 0">
+              <td colspan="8" class="empty">
+                No students found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>fullName</th>
-          <th>major</th>
-          <th>year</th>
-          <th>status</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let s of students">
-          <td>{{ s.studentCode }}</td>
-          <td>{{ s.fullName }}</td>
-          <td>{{ s.major }}</td>
-          <td>year {{ s.year }}</td>
-          <td>
-            <span
-              class="status"
-              [class.active]="s.status === 'ACTIVE'"
-              [class.inactive]="s.status === 'INACTIVE'"
-            >
-              {{ s.status }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
 </section>
-
