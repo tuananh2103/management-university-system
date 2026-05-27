@@ -1,56 +1,61 @@
-<section class="login">
-  <div class="card">
-    <div class="header">
+<section class="login-page">
+  <div class="login-card">
+    <div class="page-header">
       <h1>Login</h1>
-      <p>Connect to get more features</p>
+      <p class="muted">Sign in to the university management system.</p>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="alert error" *ngIf="error">
+      {{ error }}
+    </div>
+
+    <div class="alert success" *ngIf="message">
+      {{ message }}
+    </div>
+
+    <div *ngIf="currentUser" class="user-panel">
+      <h2>You are logged in</h2>
+
+      <p><strong>Name:</strong> {{ currentUser.fullName }}</p>
+      <p><strong>Username:</strong> {{ currentUser.username }}</p>
+      <p><strong>Role:</strong> {{ currentUser.role }}</p>
+
+      <button class="btn-ghost" type="button" (click)="logout()">
+        Logout
+      </button>
+    </div>
+
+    <form *ngIf="!currentUser" (ngSubmit)="login()" class="login-form">
       <div class="field">
-        <label for="username">Username</label>
+        <label>Username</label>
         <input
-          id="username"
           type="text"
-          formControlName="username"
-          placeholder="Example: admin"
-          [class.invalid]="username.touched && username.invalid"
+          name="username"
+          [(ngModel)]="form.username"
+          placeholder="admin or student"
         />
-        <div class="hint" *ngIf="username.touched && username.invalid">
-          <span *ngIf="username.errors?.['required']">Username is required</span>
-          <span *ngIf="username.errors?.['minlength']">Username minimun length is 3</span>
-        </div>
       </div>
 
       <div class="field">
-        <label for="password">Password</label>
+        <label>Password</label>
         <input
-          id="password"
           type="password"
-          formControlName="password"
-          placeholder="••••••••"
-          [class.invalid]="password.touched && password.invalid"
+          name="password"
+          [(ngModel)]="form.password"
+          placeholder="admin123 or student123"
         />
-        <div class="hint" *ngIf="password.touched && password.invalid">
-          <span *ngIf="password.errors?.['required']">Password is required</span>
-          <span *ngIf="password.errors?.['minlength']">Password minimum length is 6</span>
-        </div>
       </div>
 
-      <div class="alert" *ngIf="status === 'ERROR'">
-        {{ errorMessage }}
-      </div>
-
-      <div class="alert success" *ngIf="status === 'SUCCESS'">
-        Login successful (mock). The next step will redirect to the dashboard.
-      </div>
-
-      <button class="btn" type="submit" [disabled]="status === 'LOADING'">
-        <span *ngIf="status !== 'LOADING'">Login</span>
-        <span *ngIf="status === 'LOADING'">Processing...</span>
+      <button class="btn-primary" type="submit" [disabled]="loading">
+        {{ loading ? 'Logging in...' : 'Login' }}
       </button>
 
-      <div class="note">
-        <strong>Demo:</strong> username <code>admin</code> / password <code>admin123</code>
+      <div class="hint">
+        Demo accounts:
+        <br />
+        <strong>admin</strong> / admin123
+        <br />
+        <strong>student</strong> / student123
       </div>
     </form>
   </div>

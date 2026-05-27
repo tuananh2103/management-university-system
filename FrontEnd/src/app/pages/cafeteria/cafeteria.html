@@ -1,32 +1,144 @@
-<section class="cafe">
+<section class="cafeteria">
   <div class="page-header">
-    <h1>Campus Café</h1>
-    <p class="subtitle">Menu today</p>
+    <h1>Cafeteria</h1>
+    <p class="muted">Cafeteria menu items are loaded from Spring Boot backend API.</p>
   </div>
 
-  <div class="menu">
-    <div class="card" *ngFor="let item of cafeItems" [class.unavailable]="!item.available">
-
-      <div class="card-header">
-        <span class="category">{{ item.category }}</span>
-        <span
-          class="status"
-          [class.on]="item.available"
-          [class.off]="!item.available"
-        >
-          {{ item.available ? 'AVAILABLE' : 'SOLD OUT' }}
-        </span>
+  <div class="grid">
+    <div class="box">
+      <div class="box-title">
+        {{ editingId === null ? 'Add Menu Item' : 'Edit Menu Item' }}
       </div>
 
-      <div class="card-body">
-        <h3>{{ item.name }}</h3>
-        <p class="price">{{ formatPrice(item.price) }}</p>
-      </div>
+      <form (ngSubmit)="submitForm()" class="cafeteria-form">
+        <div class="field">
+          <label>Name</label>
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="form.name"
+            placeholder="Example: Chicken Sandwich"
+          />
+        </div>
 
-      <div class="card-footer">
-        <button [disabled]="!item.available">
-          Make your order now
+        <div class="field">
+          <label>Category</label>
+          <select name="category" [(ngModel)]="form.category">
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Price</label>
+          <input
+            type="number"
+            name="price"
+            [(ngModel)]="form.price"
+            min="0"
+            step="0.1"
+          />
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea
+            name="description"
+            [(ngModel)]="form.description"
+            placeholder="Short description"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select name="status" [(ngModel)]="form.status">
+            <option *ngFor="let status of statuses" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit" [disabled]="saving">
+            {{ editingId === null ? 'Create' : 'Update' }}
+          </button>
+
+          <button
+            class="btn-ghost"
+            type="button"
+            *ngIf="editingId !== null"
+            (click)="cancelEdit()"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Menu Items</div>
+
+      <div class="toolbar">
+        <div class="field search-field">
+          <label>Search</label>
+          <input
+            type="text"
+            [(ngModel)]="search"
+            placeholder="Search by name, category, status..."
+          />
+        </div>
+
+        <button class="btn-ghost" type="button" (click)="loadItems()">
+          Refresh
         </button>
+      </div>
+
+      <div class="alert error" *ngIf="error">
+        {{ error }}
+      </div>
+
+      <div class="alert success" *ngIf="message">
+        {{ message }}
+      </div>
+
+      <div class="loading" *ngIf="loading">
+        Loading cafeteria items...
+      </div>
+
+      <div class="cards" *ngIf="!loading">
+        <div class="menu-card" *ngFor="let item of filteredItems">
+          <div class="menu-card-header">
+            <div>
+              <h3>{{ item.name }}</h3>
+              <span class="category">{{ item.category }}</span>
+            </div>
+
+            <span class="badge" [class.sold-out]="item.status === 'SOLD_OUT'">
+              {{ item.status }}
+            </span>
+          </div>
+
+          <p class="description">{{ item.description }}</p>
+
+          <div class="menu-card-footer">
+            <strong>{{ item.price | currency:'EUR':'symbol':'1.2-2' }}</strong>
+
+            <div>
+              <button class="btn-small" type="button" (click)="startEdit(item)">
+                Edit
+              </button>
+
+              <button class="btn-small danger" type="button" (click)="deleteItem(item.id)">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="filteredItems.length === 0" class="empty">
+          No cafeteria items found.
+        </div>
       </div>
     </div>
   </div>

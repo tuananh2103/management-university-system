@@ -1,40 +1,169 @@
 <section class="library">
   <div class="page-header">
-    <h1>Thư viện</h1>
-
-    <div class="toolbar">
-      <input type="text" placeholder="Tìm theo tên sách / tác giả / ISBN" disabled />
-      <button class="btn-primary" disabled>+ Add book</button>
-    </div>
+    <h1>Library</h1>
+    <p class="muted">Books are loaded from Spring Boot backend API.</p>
   </div>
 
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>ISBN</th>
-          <th>Title</th>
-          <th>Author</th>
-          <th>Category</th>
-          <th>Pulished Year</th>
-          <th>Available</th>
-        </tr>
-      </thead>
+  <div class="grid">
+    <!-- Form -->
+    <div class="box">
+      <div class="box-title">
+        {{ editingId === null ? 'Add Book' : 'Edit Book' }}
+      </div>
 
-      <tbody>
-        <tr *ngFor="let b of books">
-          <td class="mono">{{ b.isbn }}</td>
-          <td class="title">{{ b.title }}</td>
-          <td>{{ b.author }}</td>
-          <td>{{ b.category }}</td>
-          <td>{{ b.publishedYear }}</td>
-          <td>
-            <span class="status" [class.available]="b.available" [class.borrowed]="!b.available">
-              {{ b.available ? 'AVAILABLE' : 'BORROWED' }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <form (ngSubmit)="submitForm()" class="book-form">
+        <div class="field">
+          <label>ISBN</label>
+          <input
+            type="text"
+            name="isbn"
+            [(ngModel)]="form.isbn"
+            placeholder="Example: 978-0132350884"
+          />
+        </div>
+
+        <div class="field">
+          <label>Title</label>
+          <input
+            type="text"
+            name="title"
+            [(ngModel)]="form.title"
+            placeholder="Book title"
+          />
+        </div>
+
+        <div class="field">
+          <label>Author</label>
+          <input
+            type="text"
+            name="author"
+            [(ngModel)]="form.author"
+            placeholder="Author name"
+          />
+        </div>
+
+        <div class="field">
+          <label>Category</label>
+          <select name="category" [(ngModel)]="form.category">
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Published Year</label>
+          <input
+            type="number"
+            name="publishedYear"
+            [(ngModel)]="form.publishedYear"
+          />
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select name="status" [(ngModel)]="form.status">
+            <option *ngFor="let status of statuses" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit" [disabled]="saving">
+            {{ editingId === null ? 'Create' : 'Update' }}
+          </button>
+
+          <button
+            class="btn-ghost"
+            type="button"
+            *ngIf="editingId !== null"
+            (click)="cancelEdit()"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <div class="box">
+      <div class="box-title">Book List</div>
+
+      <div class="toolbar">
+        <div class="field search-field">
+          <label>Search</label>
+          <input
+            type="text"
+            [(ngModel)]="search"
+            placeholder="Search by title, author, ISBN..."
+          />
+        </div>
+
+        <button class="btn-ghost" type="button" (click)="loadBooks()">
+          Refresh
+        </button>
+      </div>
+
+      <div class="alert error" *ngIf="error">
+        {{ error }}
+      </div>
+
+      <div class="alert success" *ngIf="message">
+        {{ message }}
+      </div>
+
+      <div class="loading" *ngIf="loading">
+        Loading books...
+      </div>
+
+      <div class="table-wrapper" *ngIf="!loading">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ISBN</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Year</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let book of filteredBooks">
+              <td class="mono">{{ book.id }}</td>
+              <td class="mono">{{ book.isbn }}</td>
+              <td>{{ book.title }}</td>
+              <td>{{ book.author }}</td>
+              <td>{{ book.category }}</td>
+              <td>{{ book.publishedYear }}</td>
+              <td>
+                <span class="badge" [class.borrowed]="book.status === 'BORROWED'">
+                  {{ book.status }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-small" type="button" (click)="startEdit(book)">
+                  Edit
+                </button>
+
+                <button class="btn-small danger" type="button" (click)="deleteBook(book.id)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="filteredBooks.length === 0">
+              <td colspan="8" class="empty">
+                No books found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </section>

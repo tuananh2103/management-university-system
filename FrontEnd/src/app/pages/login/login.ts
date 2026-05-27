@@ -1,65 +1,82 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators , FormControl , FormGroup} from '@angular/forms';
-type Login = 'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR';
-type LoginForm = {
-  username: FormControl<string>;
-  password: FormControl<string>;
-};
+import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+
+import { AuthApiService } from './admin.api.service';
+import { AuthSessionService } from './admin.service';
+import { AuthUser, LoginRequest } from './login.model';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class LoginComponent{
-  status: Login = 'IDLE';
-  errorMessage = '';
-  form : FormGroup<LoginForm>;
+export class LoginComponent implements OnInit {
+  form: LoginRequest = {
+    username: '',
+    password: '',
+  };
 
-   constructor(private fb: FormBuilder) {
-    this.form = this.fb.nonNullable.group({
-      username: this.fb.nonNullable.control('', [
-        Validators.required,
-        Validators.minLength(3),
-      ]),
-      password: this.fb.nonNullable.control('', [
-        Validators.required,
-        Validators.minLength(6),
-      ]),
-    });
-   }
-  
-  submit() : void {
-    this.errorMessage = '';
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  loading = false;
+  error = '';
+  message = '';
+
+  currentUser: AuthUser | null = null;
+
+  constructor(
+    private authApi: AuthApiService,
+    private authSession: AuthSessionService
+  ) {}
+
+  ngOnInit(): void {
+    this.currentUser = this.authSession.getUser();
+  }
+
+  login(): void {
+    this.error = '';
+    this.message = '';
+
+    if (!this.form.username.trim()) {
+      this.error = 'Username is required.';
       return;
     }
-  
-  this.status = 'LOADING';
 
-  const { username, password } = this.form.getRawValue();
-  
-  // Simulate an API call
-  setTimeout(() => {
-    if (username === 'admin' && password === 'admin123') {
-      this.status = 'SUCCESS';
-      this.errorMessage = '';
-    } else {
-      this.status = 'ERROR';
-      this.errorMessage = 'Invalid username or password.';
+    if (!this.form.password.trim()) {
+      this.error = 'Password is required.';
+      return;
     }
-  }, 1500);
+
+    this.loading = true;
+
+    this.authApi.login(this.form).subscribe({
+      next: (response) => {
+        this.authSession.saveSession(response);
+        this.currentUser = response.user;
+        this.message = 'Login successful.';
+        this.loading = false;
+
+        this.form = {
+          username: '',
+          password: '',
+        };
+      },
+      error: (err: HttpErrorResponse) => {
+        this.error =
+          err.error?.message ||
+          err.error?.detail ||
+          'Invalid username or password.';
+        this.loading = false;
+      },
+    });
   }
 
-  get username(): FormControl<string> {
-    return this.form.controls.username;
-  }
-
-  get password(): FormControl<string> {
-    return this.form.controls.password;
+  logout(): void {
+    this.authSession.clearSession();
+    this.currentUser = null;
+    this.message = 'Logged out successfully.';
+    this.error = '';
   }
 }

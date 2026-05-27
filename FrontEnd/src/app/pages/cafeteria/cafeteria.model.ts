@@ -1,8 +1,26 @@
-export interface CafeItem {
+export type CafeteriaItemStatus = 'AVAILABLE' | 'SOLD_OUT';
+
+export interface CafeteriaItem {
   id: number;
   name: string;
-  description: string;
-  category: 'COFFEE' | 'TEA' | 'JUICE' | 'SNACK';
+  category: string;
   price: number;
-  available: boolean;
+  description: string;
+  status: CafeteriaItemStatus;
+}
+
+export interface CreateCafeteriaItem {
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  status: CafeteriaItemStatus;
+}
+
+export interface UpdateCafeteriaItem {
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  status: CafeteriaItemStatus;
 }
