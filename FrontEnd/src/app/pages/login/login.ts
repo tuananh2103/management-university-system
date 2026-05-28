@@ -7,6 +7,12 @@ import { AuthApiService } from './admin.api.service';
 import { AuthSessionService } from './admin.service';
 import { AuthUser, LoginRequest } from './login.model';
 
+// login component is public, but after login, user can access private routes, 
+// so we need authGuard to protect those routes. 
+// We also need to redirect user to login page ( student for example) if 
+// they try to access private routes without being authenticated. 
+// After login, we can redirect user back to the original page they wanted to access( here is student).
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -19,7 +25,7 @@ export class LoginComponent implements OnInit {
     username: '',
     password: '',
   };
-
+  returnUrl = '/';
   loading = false;
   error = '';
   message = '';
@@ -28,11 +34,19 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private authApi: AuthApiService,
-    private authSession: AuthSessionService
+    private authSession: AuthSessionService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authSession.getUser();
+
+    /**
+    * Read the returnUrl from the route query parameters.
+    * This is where the user should be redirected after successful login.
+    */
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
   }
 
   login(): void {
@@ -62,6 +76,8 @@ export class LoginComponent implements OnInit {
           username: '',
           password: '',
         };
+        // After login, redirect user to the original page they wanted to access.
+        this.router.navigateByUrl(this.returnUrl);
       },
       error: (err: HttpErrorResponse) => {
         this.error =
