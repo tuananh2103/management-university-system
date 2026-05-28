@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { finalize } from 'rxjs';
 
 import { AuthApiService } from './admin.api.service';
 import { AuthSessionService } from './admin.service';
@@ -49,10 +50,13 @@ export class LoginComponent implements OnInit {
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
   }
 
-  login(): void {
+   login(): void {
     this.error = '';
     this.message = '';
 
+    /**
+     * Basic frontend validation before calling the backend.
+     */
     if (!this.form.username.trim()) {
       this.error = 'Username is required.';
       return;
@@ -65,28 +69,50 @@ export class LoginComponent implements OnInit {
 
     this.loading = true;
 
-    this.authApi.login(this.form).subscribe({
-      next: (response) => {
-        this.authSession.saveSession(response);
-        this.currentUser = response.user;
-        this.message = 'Login successful.';
-        this.loading = false;
+    /**
+     * Send login credentials to the backend.
+     * finalize() ensures the loading state is always reset.
+     */
+    this.authApi
+      .login(this.form)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          /**
+           * Save the token and user information in localStorage.
+           * This is what the Auth Guard checks later.
+           */
+          this.authSession.saveSession(response);
+          /**
+           * Update the current user state.
+           */
+          this.currentUser = response.user;
+          /**
+           * Clear the form after successful login.
+           */
+          this.form = {
+            username: '',
+            password: '',
+          };
+          /**
+           * Redirect the user to the page they originally wanted to access.
+           * Example: /students
+           */
+          this.router.navigateByUrl(this.returnUrl);
+        },
+        error: (err: HttpErrorResponse) => {
+          console.error('Login error:', err);
 
-        this.form = {
-          username: '',
-          password: '',
-        };
-        // After login, redirect user to the original page they wanted to access.
-        this.router.navigateByUrl(this.returnUrl);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.error =
-          err.error?.message ||
-          err.error?.detail ||
-          'Invalid username or password.';
-        this.loading = false;
-      },
-    });
+          this.error =
+            err.error?.message ||
+            err.error?.detail ||
+            'Invalid username or password.';
+        },
+      });
   }
 
   logout(): void {

@@ -1,22 +1,62 @@
 <header class="header">
-  <div class="logo">MyUniversity</div>
+  <a routerLink="/" class="logo">
+    MyUniversity
+  </a>
 
   <nav class="nav">
-    <a routerLink="" routerLinkActive="active" class="nav-link" [routerLinkActiveOptions]="{ exact: true }">
-      Main Pape
+    <!-- Public link: everyone can access the Home page. -->
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-link"
+    >
+      Main Page
     </a>
-    <a routerLink="students" routerLinkActive="active" class="nav-link">
-      Students
+
+    <!-- Protected links: only visible after login. -->
+    <ng-container *ngIf="isLoggedIn">
+      <a routerLink="/students" routerLinkActive="active" class="nav-link">
+        Students
+      </a>
+
+      <a routerLink="/courses" routerLinkActive="active" class="nav-link">
+        Courses
+      </a>
+
+      <a routerLink="/library" routerLinkActive="active" class="nav-link">
+        Library
+      </a>
+
+      <a routerLink="/cafeteria" routerLinkActive="active" class="nav-link">
+        Cafeteria
+      </a>
+    </ng-container>
+
+    <!-- Login link: only visible when the user is not authenticated. -->
+    <a
+      *ngIf="!isLoggedIn"
+      routerLink="/login"
+      routerLinkActive="active"
+      class="nav-link"
+    >
+      Login
     </a>
-    <a routerLink="courses" routerLinkActive="active" class="nav-link">
-      Courses
-    </a>
-    <a routerLink="login" routerLinkActive="active" class="nav-link">
-      login
-    </a>
+
+    <!-- User area: visible only when the user is authenticated. -->
+    <div class="user-area" *ngIf="isLoggedIn && currentUser">
+      <span class="user-name">
+        Hello, {{ currentUser.fullName }}
+      </span>
+
+      <button class="logout-button" type="button" (click)="logout()">
+        Logout
+      </button>
+    </div>
   </nav>
 </header>
 
 <main class="main">
+  <!-- Angular displays the selected page here. -->
   <router-outlet></router-outlet>
 </main>
