@@ -1,113 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<section class = "home">
-    <div class = "hero" >
-        <p class = "badge"> University Management </p>
-        <h1 class = "title"> Welcome to University Management System </h1>
-        <p class = "subtitle"> Manage your university with ease and efficiency </p>
-        <div class ="actions"> 
-            <a class = "btn btn-primary" routerLink="/students"> Students decks </a>
-            <a class = "btn btn-secondary" routerLink="/courses"> Courses and timetable </a>
+<section class="home">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">University Management System</p>
+      <h1>Welcome to MyUniversity</h1>
 
-        </div>
-        <div class = "meta">
-
-            <div class = "meta-item">
-                <span class = "meta-label">Version</span>
-                <span class = "meta-value">1.0.0(Beta testing)</span>
-            </div>
-
-            <div class = "meta-item">
-                <span class = "meta-label">Last Updated</span>
-                <span class = "meta-value">Decembre 2025</span>
-            </div>
-
-            <div class = "meta-item">
-                <span class = "meta-label">Developed by</span>
-                <span class = "meta-value">TuanAnh_backend </span>
-            </div>
-        </div> 
-    
-        <div class = "hero__panel">
-            <h2 class = "panel__title">Join now</h2>
-            <div class = "cards">
-
-                <a class = "card" routerLink="/students">
-                    <div class ="card__title"> Students </div>
-                    <div class ="card__description"> Manage student information, enrollment, and academic records. </div>
-                </a>
-
-                <a class = "card" routerLink="/courses">
-                    <div class ="card__title"> Courses </div>
-                    <div class ="card__description"> Manage course offerings, schedules, and instructors. </div>
-                </a>
-
-                <a class = "card" routerLink="/cafeteria">
-                    <div class ="card__title"> Cafeteria </div>
-                    <div class ="card__description"> Manage cafeteria menus, orders, and payments. </div>
-                </a>
-
-                <a class = "card" routerLink="/library">
-                    <div class ="card__title"> Library </div>
-                    <div class ="card__description"> Manage library resources, borrowing, and returns. </div>
-                </a>
-                
-                <a class = "card" routerLink="/login">
-                    <div class ="card__title"> Connect </div>
-                    <div class ="card__description"> Admin/Staff/Student </div>
-                </a>
-
-                <a class = "card card--disabled" href ="#" (click) ="$event.preventDefault()">
-                    <div class ="card__title"> More features coming soon </div>
-                    <div class ="card__description"> Stay tuned for updates! </div>
-                </a>
-
-            </div>
-        </div>
+      <p class="muted">
+        Manage students, courses, library books, cafeteria items and user access from one web application.
+      </p>
     </div>
-    <!-- Summary -->
-    <div class ="grid">
-        <div class ="box">
-            <div class ="box__header">
-                <h3 class ="box__title"> Announcement </h3>
-                <span class ="box__hint"> Latest news and updates </span>
-            </div>
 
-            <ul class ="box__list">
-                <li class ="box__item">
-                    <span class ="item__title">Semester 2 plan has been updated</span>
-                    <span class ="item__meta"> Training Department  • 2 hours ago</span>
-                </li>
-                <li class ="box__item">
-                    <span class ="item__title">New library resources available</span>
-                    <span class ="item__meta"> Library Team  • 1 day ago</span>
-                </li>
-                <li class ="box__item">
-                    <span class ="item__title">Cafeteria menu updated for the week</span>
-                    <span class ="item__meta"> Cafeteria Staff  • 3 days ago</span>
-                </li>
-            </ul>
-        </div>
-        <div class ="box">
-            <div class ="box__header">
-                <h3 class ="box__title"> Events coming soon </h3>
-                <span class ="box__hint"> Don't miss out! </span>
-            </div>
-
-            <div class ="schedule">
-                <div class ="schedule__item">
-                    <span class ="item__date">25 Dec 2025</span>
-                    <span class ="item__event">Christmas Celebration</span>
-                </div>
-                <div class ="schedule__item">
-                    <span class ="item__date">10 Jan 2026</span>
-                    <span class ="item__event">New Semester Orientation</span>
-                </div>
-                <div class ="schedule__item">
-                    <span class ="item__date">14 Feb 2026</span>
-                    <span class ="item__event">Valentine's Day Social</span>
-                </div>
-            </div>
-        </div>
+    <div class="user-card" *ngIf="currentUser">
+      <span class="label">Logged in as</span>
+      <strong>{{ currentUser.fullName }}</strong>
+      <span>{{ currentUser.role }}</span>
     </div>
+
+    <div class="user-card" *ngIf="!currentUser">
+      <span class="label">Status</span>
+      <strong>Not logged in</strong>
+      <a routerLink="/login">Go to login</a>
+    </div>
+  </div>
+
+  <div class="alert error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    Loading dashboard...
+  </div>
+
+  <div class="stats-grid" *ngIf="summary && !loading">
+    <div class="stat-card">
+      <span class="stat-label">Students</span>
+      <strong>{{ summary.totalStudents }}</strong>
+      <small>
+        {{ summary.activeStudents }} active /
+        {{ summary.inactiveStudents }} inactive
+      </small>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Books</span>
+      <strong>{{ summary.totalBooks }}</strong>
+      <small>
+        {{ summary.availableBooks }} available /
+        {{ summary.borrowedBooks }} borrowed
+      </small>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Cafeteria Items</span>
+      <strong>{{ summary.totalCafeteriaItems }}</strong>
+      <small>
+        {{ summary.availableCafeteriaItems }} available /
+        {{ summary.soldOutCafeteriaItems }} sold out
+      </small>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-label">Courses</span>
+      <strong>8</strong>
+      <small>Semesters available from backend course files</small>
+    </div>
+  </div>
+
+  <div class="empty" *ngIf="!summary && !loading && !error">
+    No dashboard data available.
+  </div>
+
+  <div class="quick-links">
+    <a routerLink="/students" class="quick-card">
+      <strong>Students</strong>
+      <span>Manage student records</span>
+    </a>
+
+    <a routerLink="/courses" class="quick-card">
+      <strong>Courses</strong>
+      <span>Register courses by semester</span>
+    </a>
+
+    <a routerLink="/library" class="quick-card">
+      <strong>Library</strong>
+      <span>Manage books and availability</span>
+    </a>
+
+    <a routerLink="/cafeteria" class="quick-card">
+      <strong>Cafeteria</strong>
+      <span>Manage menu items</span>
+    </a>
+  </div>
 </section>
