@@ -1,10 +1,3 @@
-
----
-
-# 6. Exemple pour ton repo `Management-University`
-
-Ton CV dit que ce projet contient Angular, Spring Boot, APIs REST, PostgreSQL, Docker, Git, tests JUnit en préparation. Donc ton README doit vendre exactement ça. :contentReference[oaicite:2]{index=2}
-
 ## README recommandé
 
 ```md
