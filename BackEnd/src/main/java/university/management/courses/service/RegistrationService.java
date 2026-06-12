@@ -1,169 +1,102 @@
 package university.management.courses.service;
 
-import tools.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import university.management.courses.dto.CourseDto;
 import university.management.courses.dto.RegisterRequest;
 import university.management.courses.dto.RegistrationDto;
+import university.management.courses.entity.CourseRegistration;
+import university.management.courses.repository.CourseRegistrationRepository;
+import university.management.courses.repository.CourseRepository;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class RegistrationService {
 
-    private final CourseService courseService;
-    private final ObjectMapper objectMapper;
+    private final CourseRegistrationRepository registrationRepository;
+    private final CourseRepository courseRepository;
 
-    public RegistrationService(CourseService courseService, ObjectMapper objectMapper) {
-        this.courseService = courseService;
-        this.objectMapper = objectMapper;
+    public RegistrationService(CourseRegistrationRepository registrationRepository, CourseRepository courseRepository) {
+        this.registrationRepository = registrationRepository;
+        this.courseRepository = courseRepository;
     }
 
     public RegistrationDto register(RegisterRequest request) {
         validateRequest(request);
 
-        Path filePath = getRegistrationFilePath(request.regNumber(), request.semester());
-
-        if (Files.exists(filePath)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Student already registered courses for this semester"
-            );
+        if (registrationRepository.existsByRegNumberAndSemester(request.regNumber(), request.semester())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Student already registered courses for this semester");
         }
 
-        List<Integer> courseIds = request.courseIds();
+        validateCourseIds(request.semester(), request.courseIds());
 
-        validateCourseIds(request.semester(), courseIds);
+        CourseRegistration reg = new CourseRegistration();
+        reg.setRegNumber(request.regNumber());
+        reg.setSemester(request.semester());
+        reg.setCourseIds(request.courseIds().stream().map(Long::valueOf).collect(Collectors.toList()));
 
-        RegistrationDto registration = new RegistrationDto(
-                request.regNumber(),
-                request.semester(),
-                courseIds,
-                Instant.now().toString()
-        );
-
-        try {
-            Files.createDirectories(filePath.getParent());
-            objectMapper.writeValue(filePath.toFile(), registration);
-            return registration;
-        } catch (Exception e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to save registration",
-                    e
-            );
-        }
+        CourseRegistration saved = registrationRepository.save(reg);
+        return toDto(saved);
     }
 
+    @Transactional(readOnly = true)
     public RegistrationDto getRegistration(String regNumber, int semester) {
-        Path filePath = getRegistrationFilePath(regNumber, semester);
-
-        if (!Files.exists(filePath)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "No registration found for this student and semester"
-            );
-        }
-
-        try {
-            return objectMapper.readValue(filePath.toFile(), RegistrationDto.class);
-        } catch (Exception e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to read registration",
-                    e
-            );
-        }
+        return registrationRepository.findByRegNumberAndSemester(regNumber, semester)
+                .map(this::toDto)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No registration found for this student and semester"));
     }
 
     public void deleteRegistration(String regNumber, int semester) {
-        Path filePath = getRegistrationFilePath(regNumber, semester);
-
-        try {
-            Files.deleteIfExists(filePath);
-        } catch (Exception e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to delete registration",
-                    e
-            );
-        }
+        CourseRegistration reg = registrationRepository.findByRegNumberAndSemester(regNumber, semester)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No registration found for this student and semester"));
+        registrationRepository.delete(reg);
     }
 
     private void validateRequest(RegisterRequest request) {
-        if (request.regNumber() == null || request.regNumber().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Registration number is required"
-            );
-        }
-
-        if (request.semester() < 1 || request.semester() > 8) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Semester must be between 1 and 8"
-            );
-        }
-
-        if (request.courseIds() == null || request.courseIds().isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Course IDs are required"
-            );
-        }
-
-        if (request.courseIds().size() < 4) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "You must register at least 4 courses"
-            );
-        }
+        if (request.regNumber() == null || request.regNumber().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration number is required");
+        if (request.semester() < 1 || request.semester() > 8)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Semester must be between 1 and 8");
+        if (request.courseIds() == null || request.courseIds().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course IDs are required");
+        if (request.courseIds().size() < 4)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must register at least 4 courses");
 
         Set<Integer> uniqueIds = new HashSet<>(request.courseIds());
-
-        if (uniqueIds.size() != request.courseIds().size()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Duplicate course IDs are not allowed"
-            );
-        }
+        if (uniqueIds.size() != request.courseIds().size())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate course IDs are not allowed");
     }
 
     private void validateCourseIds(int semester, List<Integer> courseIds) {
-        List<CourseDto> offeredCourses = courseService.getCoursesBySemester(semester);
-
-        Set<Integer> offeredIds = new HashSet<>();
-
-        for (CourseDto course : offeredCourses) {
-            offeredIds.add(course.id());
-        }
+        Set<Long> offeredIds = courseRepository.findBySemester(semester)
+                .stream().map(c -> c.getId()).collect(Collectors.toSet());
 
         for (Integer id : courseIds) {
-            if (!offeredIds.contains(id)) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Invalid course id: " + id
-                );
+            if (!offeredIds.contains(Long.valueOf(id))) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid course id: " + id);
             }
         }
     }
 
-    private Path getRegistrationFilePath(String regNumber, int semester) {
-        String safeRegNumber = regNumber.replaceAll("[^a-zA-Z0-9_-]", "_");
-
-        return Paths.get(
-                "students_data",
-                "courses",
-                safeRegNumber + "_sem" + semester + ".json"
+    private RegistrationDto toDto(CourseRegistration reg) {
+        List<Integer> courseIds = reg.getCourseIds().stream()
+                .map(Long::intValue)
+                .collect(Collectors.toList());
+        return new RegistrationDto(
+                reg.getRegNumber(),
+                reg.getSemester(),
+                courseIds,
+                reg.getRegisteredAt().toString()
         );
     }
 }

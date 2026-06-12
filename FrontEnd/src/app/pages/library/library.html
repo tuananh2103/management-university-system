@@ -1,85 +1,56 @@
-<section class="library">
-  <div class="page-header">
-    <h1>Library</h1>
-    <p class="muted">Books are loaded from Spring Boot backend API.</p>
+<section class="max-w-7xl mx-auto px-6 py-8">
+  <div class="mb-6">
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-1">Library</h1>
+    <p class="text-slate-500 text-sm">Manage book records from the PostgreSQL database.</p>
   </div>
 
-  <div class="grid">
+  <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
     <!-- Form -->
-    <div class="box">
-      <div class="box-title">
-        {{ editingId === null ? 'Add Book' : 'Edit Book' }}
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 h-fit">
+      <div class="text-base font-bold text-slate-800 mb-4">
+        {{ editingId === null ? '➕ Add Book' : '✏️ Edit Book' }}
       </div>
 
-      <form (ngSubmit)="submitForm()" class="book-form">
-        <div class="field">
-          <label>ISBN</label>
-          <input
-            type="text"
-            name="isbn"
-            [(ngModel)]="form.isbn"
-            placeholder="Example: 978-0132350884"
-          />
+      <form (ngSubmit)="submitForm()" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-slate-700">ISBN</label>
+          <input class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all" type="text" name="isbn" [(ngModel)]="form.isbn" placeholder="Example: 978-0132350884" />
         </div>
 
-        <div class="field">
-          <label>Title</label>
-          <input
-            type="text"
-            name="title"
-            [(ngModel)]="form.title"
-            placeholder="Book title"
-          />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-slate-700">Title</label>
+          <input class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all" type="text" name="title" [(ngModel)]="form.title" placeholder="Book title" />
         </div>
 
-        <div class="field">
-          <label>Author</label>
-          <input
-            type="text"
-            name="author"
-            [(ngModel)]="form.author"
-            placeholder="Author name"
-          />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-slate-700">Author</label>
+          <input class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all" type="text" name="author" [(ngModel)]="form.author" placeholder="Author name" />
         </div>
 
-        <div class="field">
-          <label>Category</label>
-          <select name="category" [(ngModel)]="form.category">
-            <option *ngFor="let category of categories" [value]="category">
-              {{ category }}
-            </option>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-slate-700">Category</label>
+          <select class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 bg-white" name="category" [(ngModel)]="form.category">
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
           </select>
         </div>
 
-        <div class="field">
-          <label>Published Year</label>
-          <input
-            type="number"
-            name="publishedYear"
-            [(ngModel)]="form.publishedYear"
-          />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-slate-700">Published Year</label>
+          <input class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all" type="number" name="publishedYear" [(ngModel)]="form.publishedYear" />
         </div>
 
-        <div class="field">
-          <label>Status</label>
-          <select name="status" [(ngModel)]="form.status">
-            <option *ngFor="let status of statuses" [value]="status">
-              {{ status }}
-            </option>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-slate-700">Status</label>
+          <select class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 bg-white" name="status" [(ngModel)]="form.status">
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
           </select>
         </div>
 
-        <div class="actions">
-          <button class="btn-primary" type="submit" [disabled]="saving">
+        <div class="flex gap-2 mt-1">
+          <button class="flex-1 bg-sky-500 hover:bg-sky-600 text-white border-0 rounded-xl py-2.5 text-sm font-bold cursor-pointer transition-colors disabled:opacity-60" type="submit" [disabled]="saving">
             {{ editingId === null ? 'Create' : 'Update' }}
           </button>
-
-          <button
-            class="btn-ghost"
-            type="button"
-            *ngIf="editingId !== null"
-            (click)="cancelEdit()"
-          >
+          <button class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 border-0 rounded-xl py-2.5 text-sm font-semibold cursor-pointer transition-colors" type="button" *ngIf="editingId !== null" (click)="cancelEdit()">
             Cancel
           </button>
         </div>
@@ -87,79 +58,57 @@
     </div>
 
     <!-- Table -->
-    <div class="box">
-      <div class="box-title">Book List</div>
-
-      <div class="toolbar">
-        <div class="field search-field">
-          <label>Search</label>
-          <input
-            type="text"
-            [(ngModel)]="search"
-            placeholder="Search by title, author, ISBN..."
-          />
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="flex items-center justify-between gap-4 mb-4 flex-wrap">
+        <div class="text-base font-bold text-slate-800">Book List</div>
+        <div class="flex items-center gap-2">
+          <input class="border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-sky-400 w-60" type="text" [(ngModel)]="search" placeholder="Search by title, author, ISBN..." />
+          <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 border-0 rounded-xl px-4 py-2 text-sm font-semibold cursor-pointer transition-colors" type="button" (click)="loadBooks()">Refresh</button>
         </div>
-
-        <button class="btn-ghost" type="button" (click)="loadBooks()">
-          Refresh
-        </button>
       </div>
 
-      <div class="alert error" *ngIf="error">
-        {{ error }}
-      </div>
+      <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4 text-sm" *ngIf="error">{{ error }}</div>
+      <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4 text-sm" *ngIf="message">{{ message }}</div>
+      <div class="text-slate-400 text-sm mb-4" *ngIf="loading">Loading books...</div>
 
-      <div class="alert success" *ngIf="message">
-        {{ message }}
-      </div>
-
-      <div class="loading" *ngIf="loading">
-        Loading books...
-      </div>
-
-      <div class="table-wrapper" *ngIf="!loading">
-        <table>
+      <div class="overflow-x-auto" *ngIf="!loading">
+        <table class="w-full text-sm border-collapse">
           <thead>
-            <tr>
-              <th>ID</th>
-              <th>ISBN</th>
-              <th>Title</th>
-              <th>Author</th>
-              <th>Category</th>
-              <th>Year</th>
-              <th>Status</th>
-              <th>Actions</th>
+            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+              <th class="text-left px-4 py-3 font-semibold">ID</th>
+              <th class="text-left px-4 py-3 font-semibold">ISBN</th>
+              <th class="text-left px-4 py-3 font-semibold">Title</th>
+              <th class="text-left px-4 py-3 font-semibold">Author</th>
+              <th class="text-left px-4 py-3 font-semibold">Category</th>
+              <th class="text-left px-4 py-3 font-semibold">Year</th>
+              <th class="text-left px-4 py-3 font-semibold">Status</th>
+              <th class="text-left px-4 py-3 font-semibold">Actions</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr *ngFor="let book of filteredBooks">
-              <td class="mono">{{ book.id }}</td>
-              <td class="mono">{{ book.isbn }}</td>
-              <td>{{ book.title }}</td>
-              <td>{{ book.author }}</td>
-              <td>{{ book.category }}</td>
-              <td>{{ book.publishedYear }}</td>
-              <td>
-                <span class="badge" [class.borrowed]="book.status === 'BORROWED'">
+            <tr *ngFor="let book of filteredBooks" class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+              <td class="px-4 py-3 font-mono text-slate-400">{{ book.id }}</td>
+              <td class="px-4 py-3 font-mono text-slate-600">{{ book.isbn }}</td>
+              <td class="px-4 py-3 font-semibold text-slate-800">{{ book.title }}</td>
+              <td class="px-4 py-3 text-slate-600">{{ book.author }}</td>
+              <td class="px-4 py-3 text-slate-600">{{ book.category }}</td>
+              <td class="px-4 py-3 text-slate-600">{{ book.publishedYear }}</td>
+              <td class="px-4 py-3">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold"
+                  [class]="book.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'">
                   {{ book.status }}
                 </span>
               </td>
-              <td>
-                <button class="btn-small" type="button" (click)="startEdit(book)">
-                  Edit
-                </button>
-
-                <button class="btn-small danger" type="button" (click)="deleteBook(book.id)">
-                  Delete
-                </button>
+              <td class="px-4 py-3">
+                <div class="flex gap-1.5">
+                  <button class="bg-sky-50 hover:bg-sky-100 text-sky-600 border-0 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors" type="button" (click)="startEdit(book)">Edit</button>
+                  <button class="bg-red-50 hover:bg-red-100 text-red-600 border-0 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors" type="button" (click)="deleteBook(book.id)">Delete</button>
+                </div>
               </td>
             </tr>
 
             <tr *ngIf="filteredBooks.length === 0">
-              <td colspan="8" class="empty">
-                No books found.
-              </td>
+              <td colspan="8" class="px-4 py-8 text-center text-slate-400">No books found.</td>
             </tr>
           </tbody>
         </table>

@@ -1,172 +1,101 @@
 package university.management.library.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import university.management.library.dto.BookDto;
 import university.management.library.dto.CreateBook;
 import university.management.library.dto.UpdateBook;
+import university.management.library.entity.Book;
+import university.management.library.repository.BookRepository;
+
+import java.util.List;
 
 @Service
+@Transactional
 public class BookService {
 
-    private final List<BookDto> books = new ArrayList<>();
-    private final AtomicLong idGenerator = new AtomicLong(4);
+    private final BookRepository bookRepository;
 
-    public BookService() {
-        books.add(new BookDto(
-                1L,
-                "978-0134685991",
-                "Effective Java",
-                "Joshua Bloch",
-                "Programming",
-                2018,
-                "AVAILABLE"
-        ));
-
-        books.add(new BookDto(
-                2L,
-                "978-1617294945",
-                "Spring in Action",
-                "Craig Walls",
-                "Backend",
-                2022,
-                "AVAILABLE"
-        ));
-
-        books.add(new BookDto(
-                3L,
-                "978-1491950357",
-                "Building Microservices",
-                "Sam Newman",
-                "Architecture",
-                2021,
-                "BORROWED"
-        ));
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<BookDto> getAllBooks() {
-        return books;
+        return bookRepository.findAll().stream().map(this::toDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public BookDto getBookById(Long id) {
-        return books.stream()
-                .filter(book -> book.id().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Book not found with id: " + id
-                ));
+        return bookRepository.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found with id: " + id));
     }
 
     public BookDto createBook(CreateBook request) {
-        validateCreateRequest(request);
-
-        Long id = idGenerator.getAndIncrement();
-
-        BookDto book = new BookDto(
-                id,
-                request.isbn(),
-                request.title(),
-                request.author(),
-                request.category(),
-                request.publishedYear(),
-                request.status()
-        );
-
-        books.add(book);
-
-        return book;
+        validateCreate(request);
+        Book book = new Book();
+        book.setIsbn(request.isbn());
+        book.setTitle(request.title());
+        book.setAuthor(request.author());
+        book.setCategory(request.category());
+        book.setPublishedYear(request.publishedYear());
+        book.setStatus(request.status() != null ? request.status() : "AVAILABLE");
+        return toDto(bookRepository.save(book));
     }
 
     public BookDto updateBook(Long id, UpdateBook request) {
-        validateUpdateRequest(request);
+        validateUpdate(request);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found with id: " + id));
 
-        for (int i = 0; i < books.size(); i++) {
-            BookDto current = books.get(i);
-
-            if (current.id().equals(id)) {
-                BookDto updated = new BookDto(
-                        id,
-                        request.isbn(),
-                        request.title(),
-                        request.author(),
-                        request.category(),
-                        request.publishedYear(),
-                        request.status()
-                );
-
-                books.set(i, updated);
-
-                return updated;
-            }
+        if (bookRepository.existsByIsbnAndIdNot(request.isbn(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ISBN already in use");
         }
 
-        throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Book not found with id: " + id
-        );
+        book.setIsbn(request.isbn());
+        book.setTitle(request.title());
+        book.setAuthor(request.author());
+        book.setCategory(request.category());
+        book.setPublishedYear(request.publishedYear());
+        book.setStatus(request.status());
+        return toDto(bookRepository.save(book));
     }
 
     public void deleteBook(Long id) {
-        boolean removed = books.removeIf(book -> book.id().equals(id));
-
-        if (!removed) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Book not found with id: " + id
-            );
+        if (!bookRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found with id: " + id);
         }
+        bookRepository.deleteById(id);
     }
 
-    private void validateCreateRequest(CreateBook request) {
-        if (request.isbn() == null || request.isbn().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "ISBN is required"
-            );
-        }
+    public long countAll() { return bookRepository.count(); }
+    public long countByStatus(String status) { return bookRepository.countByStatus(status); }
 
-        if (request.title() == null || request.title().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Title is required"
-            );
-        }
-
-        if (request.author() == null || request.author().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Author is required"
-            );
-        }
+    private void validateCreate(CreateBook request) {
+        if (request.isbn() == null || request.isbn().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN is required");
+        if (request.title() == null || request.title().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required");
+        if (request.author() == null || request.author().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author is required");
+        if (bookRepository.existsByIsbn(request.isbn()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ISBN already exists");
     }
 
-    private void validateUpdateRequest(UpdateBook request) {
-        if (request.isbn() == null || request.isbn().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "ISBN is required"
-            );
-        }
+    private void validateUpdate(UpdateBook request) {
+        if (request.isbn() == null || request.isbn().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN is required");
+        if (request.title() == null || request.title().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required");
+        if (request.author() == null || request.author().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author is required");
+    }
 
-        if (request.title() == null || request.title().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Title is required"
-            );
-        }
-
-        if (request.author() == null || request.author().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Author is required"
-            );
-        }
+    private BookDto toDto(Book b) {
+        return new BookDto(b.getId(), b.getIsbn(), b.getTitle(), b.getAuthor(),
+                b.getCategory(), b.getPublishedYear(), b.getStatus());
     }
 }

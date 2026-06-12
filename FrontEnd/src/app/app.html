@@ -1,62 +1,57 @@
-<header class="header">
-  <a routerLink="/" class="logo">
-    MyUniversity
+<header class="bg-slate-900 text-white px-8 flex items-center justify-between flex-wrap gap-4 py-4 lg:h-16 lg:py-0">
+  <a routerLink="/" class="text-white no-underline text-xl font-extrabold tracking-tight">
+    🎓 MyUniversity
   </a>
 
-  <nav class="nav">
-    <!-- Public link: everyone can access the Home page. -->
+  <nav class="flex items-center gap-2 flex-wrap">
     <a
       routerLink="/"
-      routerLinkActive="active"
+      routerLinkActive="bg-sky-500! text-sky-950!"
       [routerLinkActiveOptions]="{ exact: true }"
-      class="nav-link"
+      class="text-gray-200 no-underline px-4 py-2 rounded-full text-sm transition-colors hover:bg-white/10"
     >
-      Main Page
+      Home
     </a>
 
-    <!-- Protected links: only visible after login. -->
     <ng-container *ngIf="isLoggedIn">
-      <a routerLink="/students" routerLinkActive="active" class="nav-link">
+      <a routerLink="/students" routerLinkActive="bg-sky-500! text-sky-950!" class="text-gray-200 no-underline px-4 py-2 rounded-full text-sm transition-colors hover:bg-white/10">
         Students
       </a>
-
-      <a routerLink="/courses" routerLinkActive="active" class="nav-link">
+      <a routerLink="/courses" routerLinkActive="bg-sky-500! text-sky-950!" class="text-gray-200 no-underline px-4 py-2 rounded-full text-sm transition-colors hover:bg-white/10">
         Courses
       </a>
-
-      <a routerLink="/library" routerLinkActive="active" class="nav-link">
+      <a routerLink="/library" routerLinkActive="bg-sky-500! text-sky-950!" class="text-gray-200 no-underline px-4 py-2 rounded-full text-sm transition-colors hover:bg-white/10">
         Library
       </a>
-
-      <a routerLink="/cafeteria" routerLinkActive="active" class="nav-link">
+      <a routerLink="/cafeteria" routerLinkActive="bg-sky-500! text-sky-950!" class="text-gray-200 no-underline px-4 py-2 rounded-full text-sm transition-colors hover:bg-white/10">
         Cafeteria
       </a>
     </ng-container>
 
-    <!-- Login link: only visible when the user is not authenticated. -->
     <a
       *ngIf="!isLoggedIn"
       routerLink="/login"
-      routerLinkActive="active"
-      class="nav-link"
+      routerLinkActive="bg-sky-500! text-sky-950!"
+      class="text-gray-200 no-underline px-4 py-2 rounded-full text-sm transition-colors hover:bg-white/10"
     >
       Login
     </a>
 
-    <!-- User area: visible only when the user is authenticated. -->
-    <div class="user-area" *ngIf="isLoggedIn && currentUser">
-      <span class="user-name">
+    <div class="flex items-center gap-3 ml-2 pl-4 border-l border-white/20" *ngIf="isLoggedIn && currentUser">
+      <span class="text-gray-200 text-sm font-semibold">
         Hello, {{ currentUser.fullName }}
       </span>
-
-      <button class="logout-button" type="button" (click)="logout()">
+      <button
+        class="bg-slate-100 text-slate-900 border-0 rounded-full px-4 py-2 text-sm font-bold cursor-pointer hover:bg-slate-200 transition-colors"
+        type="button"
+        (click)="logout()"
+      >
         Logout
       </button>
     </div>
   </nav>
 </header>
 
-<main class="main">
-  <!-- Angular displays the selected page here. -->
+<main class="min-h-[calc(100vh-64px)] bg-white">
   <router-outlet></router-outlet>
 </main>

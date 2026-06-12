@@ -1,7 +1,6 @@
 package university.management.dashboard.service;
 
 import org.springframework.stereotype.Service;
-
 import university.management.cafe.service.CafeteriaService;
 import university.management.dashboard.dto.DashboardSummaryDto;
 import university.management.library.service.BookService;
@@ -14,57 +13,29 @@ public class DashboardService {
     private final BookService bookService;
     private final CafeteriaService cafeteriaService;
 
-    public DashboardService(
-            StudentService studentService,
-            BookService bookService,
-            CafeteriaService cafeteriaService
-    ) {
+    public DashboardService(StudentService studentService, BookService bookService, CafeteriaService cafeteriaService) {
         this.studentService = studentService;
         this.bookService = bookService;
         this.cafeteriaService = cafeteriaService;
     }
 
     public DashboardSummaryDto getSummary() {
-        var students = studentService.getAllStudents();
-        var books = bookService.getAllBooks();
-        var cafeteriaItems = cafeteriaService.getAllItems();
+        long totalStudents = studentService.countAll();
+        long activeStudents = studentService.countByStatus("ACTIVE");
+        long inactiveStudents = studentService.countByStatus("INACTIVE");
 
-        int activeStudents = (int) students.stream()
-                .filter(student -> "ACTIVE".equalsIgnoreCase(student.status()))
-                .count();
+        long totalBooks = bookService.countAll();
+        long availableBooks = bookService.countByStatus("AVAILABLE");
+        long borrowedBooks = bookService.countByStatus("BORROWED");
 
-        int inactiveStudents = (int) students.stream()
-                .filter(student -> "INACTIVE".equalsIgnoreCase(student.status()))
-                .count();
-
-        int availableBooks = (int) books.stream()
-                .filter(book -> "AVAILABLE".equalsIgnoreCase(book.status()))
-                .count();
-
-        int borrowedBooks = (int) books.stream()
-                .filter(book -> "BORROWED".equalsIgnoreCase(book.status()))
-                .count();
-
-        int availableCafeteriaItems = (int) cafeteriaItems.stream()
-                .filter(item -> "AVAILABLE".equalsIgnoreCase(item.status()))
-                .count();
-
-        int soldOutCafeteriaItems = (int) cafeteriaItems.stream()
-                .filter(item -> "SOLD_OUT".equalsIgnoreCase(item.status()))
-                .count();
+        long totalItems = cafeteriaService.countAll();
+        long availableItems = cafeteriaService.countByStatus("AVAILABLE");
+        long soldOutItems = cafeteriaService.countByStatus("SOLD_OUT");
 
         return new DashboardSummaryDto(
-                students.size(),
-                activeStudents,
-                inactiveStudents,
-
-                books.size(),
-                availableBooks,
-                borrowedBooks,
-
-                cafeteriaItems.size(),
-                availableCafeteriaItems,
-                soldOutCafeteriaItems
+                (int) totalStudents, (int) activeStudents, (int) inactiveStudents,
+                (int) totalBooks, (int) availableBooks, (int) borrowedBooks,
+                (int) totalItems, (int) availableItems, (int) soldOutItems
         );
     }
 }

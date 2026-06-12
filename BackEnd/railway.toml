@@ -1,0 +1,8 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "./mvnw package -DskipTests -q"
+
+[deploy]
+startCommand = "java -jar target/management-university-0.0.1-SNAPSHOT.jar"
+healthcheckPath = "/api/dashboard/summary"
+healthcheckTimeout = 60
