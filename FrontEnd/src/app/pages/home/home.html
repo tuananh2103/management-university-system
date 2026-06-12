@@ -1,93 +1,87 @@
-<section class="home">
-  <div class="hero">
+<section class="max-w-6xl mx-auto px-6 py-10">
+  <!-- Hero -->
+  <div class="flex flex-col md:flex-row items-start justify-between gap-6 mb-10">
     <div>
-      <p class="eyebrow">University Management System</p>
-      <h1>Welcome to MyUniversity</h1>
-
-      <p class="muted">
+      <p class="text-sky-500 text-sm font-semibold uppercase tracking-wider mb-2">University Management System</p>
+      <h1 class="text-4xl font-extrabold text-slate-900 mb-3">Welcome to MyUniversity</h1>
+      <p class="text-slate-500 text-base max-w-xl">
         Manage students, courses, library books, cafeteria items and user access from one web application.
       </p>
     </div>
 
-    <div class="user-card" *ngIf="currentUser">
-      <span class="label">Logged in as</span>
-      <strong>{{ currentUser.fullName }}</strong>
-      <span>{{ currentUser.role }}</span>
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 min-w-52 flex-shrink-0" *ngIf="currentUser">
+      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide block mb-1">Logged in as</span>
+      <strong class="text-slate-900 text-base block mb-1">{{ currentUser.fullName }}</strong>
+      <span class="bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full text-xs font-bold">{{ currentUser.role }}</span>
     </div>
 
-    <div class="user-card" *ngIf="!currentUser">
-      <span class="label">Status</span>
-      <strong>Not logged in</strong>
-      <a routerLink="/login">Go to login</a>
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 min-w-52 flex-shrink-0" *ngIf="!currentUser">
+      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide block mb-2">Status</span>
+      <strong class="text-slate-500 block mb-2">Not logged in</strong>
+      <a routerLink="/login" class="text-sky-500 font-semibold text-sm no-underline hover:underline">Go to login →</a>
     </div>
   </div>
 
-  <div class="alert error" *ngIf="error">
+  <!-- Alert -->
+  <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm" *ngIf="error">
     {{ error }}
   </div>
 
-  <div class="loading" *ngIf="loading">
-    Loading dashboard...
-  </div>
+  <!-- Loading -->
+  <div class="text-slate-400 text-sm mb-6" *ngIf="loading">Loading dashboard...</div>
 
-  <div class="stats-grid" *ngIf="summary && !loading">
-    <div class="stat-card">
-      <span class="stat-label">Students</span>
-      <strong>{{ summary.totalStudents }}</strong>
-      <small>
-        {{ summary.activeStudents }} active /
-        {{ summary.inactiveStudents }} inactive
-      </small>
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10" *ngIf="summary && !loading">
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col gap-1">
+      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Students</span>
+      <strong class="text-3xl font-extrabold text-slate-900">{{ summary.totalStudents }}</strong>
+      <small class="text-slate-500 text-xs">{{ summary.activeStudents }} active · {{ summary.inactiveStudents }} inactive</small>
     </div>
 
-    <div class="stat-card">
-      <span class="stat-label">Books</span>
-      <strong>{{ summary.totalBooks }}</strong>
-      <small>
-        {{ summary.availableBooks }} available /
-        {{ summary.borrowedBooks }} borrowed
-      </small>
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col gap-1">
+      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Books</span>
+      <strong class="text-3xl font-extrabold text-slate-900">{{ summary.totalBooks }}</strong>
+      <small class="text-slate-500 text-xs">{{ summary.availableBooks }} available · {{ summary.borrowedBooks }} borrowed</small>
     </div>
 
-    <div class="stat-card">
-      <span class="stat-label">Cafeteria Items</span>
-      <strong>{{ summary.totalCafeteriaItems }}</strong>
-      <small>
-        {{ summary.availableCafeteriaItems }} available /
-        {{ summary.soldOutCafeteriaItems }} sold out
-      </small>
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col gap-1">
+      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Cafeteria</span>
+      <strong class="text-3xl font-extrabold text-slate-900">{{ summary.totalCafeteriaItems }}</strong>
+      <small class="text-slate-500 text-xs">{{ summary.availableCafeteriaItems }} available · {{ summary.soldOutCafeteriaItems }} sold out</small>
     </div>
 
-    <div class="stat-card">
-      <span class="stat-label">Courses</span>
-      <strong>8</strong>
-      <small>Semesters available from backend course files</small>
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 flex flex-col gap-1">
+      <span class="text-xs text-slate-400 font-semibold uppercase tracking-wide">Courses</span>
+      <strong class="text-3xl font-extrabold text-slate-900">8</strong>
+      <small class="text-slate-500 text-xs">Semesters available</small>
     </div>
   </div>
 
-  <div class="empty" *ngIf="!summary && !loading && !error">
-    No dashboard data available.
-  </div>
-
-  <div class="quick-links">
-    <a routerLink="/students" class="quick-card">
-      <strong>Students</strong>
-      <span>Manage student records</span>
+  <!-- Quick Links -->
+  <h2 class="text-lg font-bold text-slate-800 mb-4">Quick Access</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <a routerLink="/students" class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 no-underline hover:border-sky-400 hover:shadow-md transition-all flex flex-col gap-1">
+      <span class="text-2xl mb-1">👤</span>
+      <strong class="text-slate-800 text-base">Students</strong>
+      <span class="text-slate-500 text-xs">Manage student records</span>
     </a>
 
-    <a routerLink="/courses" class="quick-card">
-      <strong>Courses</strong>
-      <span>Register courses by semester</span>
+    <a routerLink="/courses" class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 no-underline hover:border-sky-400 hover:shadow-md transition-all flex flex-col gap-1">
+      <span class="text-2xl mb-1">📚</span>
+      <strong class="text-slate-800 text-base">Courses</strong>
+      <span class="text-slate-500 text-xs">Register courses by semester</span>
     </a>
 
-    <a routerLink="/library" class="quick-card">
-      <strong>Library</strong>
-      <span>Manage books and availability</span>
+    <a routerLink="/library" class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 no-underline hover:border-sky-400 hover:shadow-md transition-all flex flex-col gap-1">
+      <span class="text-2xl mb-1">🏛️</span>
+      <strong class="text-slate-800 text-base">Library</strong>
+      <span class="text-slate-500 text-xs">Manage books and availability</span>
     </a>
 
-    <a routerLink="/cafeteria" class="quick-card">
-      <strong>Cafeteria</strong>
-      <span>Manage menu items</span>
+    <a routerLink="/cafeteria" class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 no-underline hover:border-sky-400 hover:shadow-md transition-all flex flex-col gap-1">
+      <span class="text-2xl mb-1">🍔</span>
+      <strong class="text-slate-800 text-base">Cafeteria</strong>
+      <span class="text-slate-500 text-xs">Manage menu items</span>
     </a>
   </div>
 </section>

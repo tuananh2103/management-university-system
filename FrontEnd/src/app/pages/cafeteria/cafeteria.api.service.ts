@@ -1,18 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { CafeteriaItem, CreateCafeteriaItem, UpdateCafeteriaItem } from './cafeteria.model';
+import { environment } from '../../../environments/environment';
 
-import {
-  CafeteriaItem,
-  CreateCafeteriaItem,
-  UpdateCafeteriaItem,
-} from './cafeteria.model';
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class CafeteriaApiService {
-  private readonly apiUrl = 'http://localhost:8080/api/cafeteria/items';
+  private readonly apiUrl = `${environment.apiUrl}/cafeteria/items`;
 
   constructor(private http: HttpClient) {}
 

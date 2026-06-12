@@ -1,172 +1,110 @@
 package university.management.students.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import university.management.students.dto.CreateStudent;
 import university.management.students.dto.StudentDto;
 import university.management.students.dto.UpdateStudent;
+import university.management.students.entity.Student;
+import university.management.students.repository.StudentRepository;
+
+import java.util.List;
 
 @Service
+@Transactional
 public class StudentService {
 
-    private final List<StudentDto> students = new ArrayList<>();
-    private final AtomicLong idGenerator = new AtomicLong(4);
+    private final StudentRepository studentRepository;
 
-    public StudentService() {
-        students.add(new StudentDto(
-                1L,
-                "STU001",
-                "Nguyen Van An",
-                "an.nguyen@university.com",
-                "Computer Science",
-                1,
-                "ACTIVE"
-        ));
-
-        students.add(new StudentDto(
-                2L,
-                "STU002",
-                "Tran Thi Binh",
-                "binh.tran@university.com",
-                "Software Engineering",
-                2,
-                "ACTIVE"
-        ));
-
-        students.add(new StudentDto(
-                3L,
-                "STU003",
-                "Le Minh Chau",
-                "chau.le@university.com",
-                "Information Systems",
-                3,
-                "INACTIVE"
-        ));
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<StudentDto> getAllStudents() {
-        return students;
+        return studentRepository.findAll().stream()
+                .map(this::toDto)
+                .toList();
     }
 
+    @Transactional(readOnly = true)
     public StudentDto getStudentById(Long id) {
-        return students.stream()
-                .filter(student -> student.id().equals(id))
-                .findFirst()
+        return studentRepository.findById(id)
+                .map(this::toDto)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Student not found with id: " + id
-                ));
+                        HttpStatus.NOT_FOUND, "Student not found with id: " + id));
     }
 
     public StudentDto createStudent(CreateStudent request) {
         validateCreate(request);
-
-        Long id = idGenerator.getAndIncrement();
-
-        StudentDto student = new StudentDto(
-                id,
-                request.studentCode(),
-                request.fullName(),
-                request.email(),
-                request.major(),
-                request.year(),
-                request.status()
-        );
-
-        students.add(student);
-
-        return student;
+        Student student = new Student();
+        student.setStudentCode(request.studentCode());
+        student.setFullName(request.fullName());
+        student.setEmail(request.email());
+        student.setMajor(request.major());
+        student.setYear(request.year());
+        student.setStatus(request.status() != null ? request.status() : "ACTIVE");
+        return toDto(studentRepository.save(student));
     }
 
     public StudentDto updateStudent(Long id, UpdateStudent request) {
         validateUpdate(request);
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found with id: " + id));
 
-        for (int i = 0; i < students.size(); i++) {
-            StudentDto current = students.get(i);
-
-            if (current.id().equals(id)) {
-                StudentDto updated = new StudentDto(
-                        id,
-                        request.studentCode(),
-                        request.fullName(),
-                        request.email(),
-                        request.major(),
-                        request.year(),
-                        request.status()
-                );
-
-                students.set(i, updated);
-
-                return updated;
-            }
+        if (studentRepository.existsByStudentCodeAndIdNot(request.studentCode(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Student code already in use");
+        }
+        if (studentRepository.existsByEmailAndIdNot(request.email(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
 
-        throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Student not found with id: " + id
-        );
+        student.setStudentCode(request.studentCode());
+        student.setFullName(request.fullName());
+        student.setEmail(request.email());
+        student.setMajor(request.major());
+        student.setYear(request.year());
+        student.setStatus(request.status());
+        return toDto(studentRepository.save(student));
     }
 
     public void deleteStudent(Long id) {
-        boolean removed = students.removeIf(student -> student.id().equals(id));
-
-        if (!removed) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Student not found with id: " + id
-            );
+        if (!studentRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found with id: " + id);
         }
+        studentRepository.deleteById(id);
     }
 
+    public long countAll() { return studentRepository.count(); }
+    public long countByStatus(String status) { return studentRepository.countByStatus(status); }
+
     private void validateCreate(CreateStudent request) {
-        if (request.studentCode() == null || request.studentCode().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Student code is required"
-            );
-        }
-
-        if (request.fullName() == null || request.fullName().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Full name is required"
-            );
-        }
-
-        if (request.email() == null || request.email().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Email is required"
-            );
-        }
+        if (request.studentCode() == null || request.studentCode().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student code is required");
+        if (request.fullName() == null || request.fullName().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full name is required");
+        if (request.email() == null || request.email().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+        if (studentRepository.existsByStudentCode(request.studentCode()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Student code already exists");
+        if (studentRepository.existsByEmail(request.email()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
     }
 
     private void validateUpdate(UpdateStudent request) {
-        if (request.studentCode() == null || request.studentCode().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Student code is required"
-            );
-        }
+        if (request.studentCode() == null || request.studentCode().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student code is required");
+        if (request.fullName() == null || request.fullName().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full name is required");
+        if (request.email() == null || request.email().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+    }
 
-        if (request.fullName() == null || request.fullName().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Full name is required"
-            );
-        }
-
-        if (request.email() == null || request.email().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Email is required"
-            );
-        }
+    private StudentDto toDto(Student s) {
+        return new StudentDto(s.getId(), s.getStudentCode(), s.getFullName(),
+                s.getEmail(), s.getMajor(), s.getYear(), s.getStatus());
     }
 }

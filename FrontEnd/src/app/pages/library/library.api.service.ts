@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
 import { Book, CreateBook, UpdateBook } from './library.model';
+import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class LibraryApiService {
-  private readonly apiUrl = 'http://localhost:8080/api/books';
+  private readonly apiUrl = `${environment.apiUrl}/books`;
 
   constructor(private http: HttpClient) {}
 
