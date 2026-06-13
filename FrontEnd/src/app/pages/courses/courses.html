@@ -1,13 +1,16 @@
-<section class="courses">
-  <div class="page-header">
-    <h1>Course Registration</h1>
-    <p class="muted">Courses and registrations are loaded from Spring Boot backend API.</p>
+<section class="max-w-7xl mx-auto px-6 py-8">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-1">Course Registration</h1>
+    <p class="text-slate-500 text-sm">Courses and registrations are loaded from Spring Boot backend API.</p>
   </div>
 
-  <div class="toolbar">
-    <div class="field">
-      <label>Reg Number</label>
+  <!-- Toolbar -->
+  <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 mb-6 flex flex-wrap items-end gap-4">
+    <div class="flex flex-col gap-1.5">
+      <label class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Reg Number</label>
       <input
+        class="border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all w-52"
         type="text"
         [(ngModel)]="regNumber"
         (change)="onRegNumberChange()"
@@ -15,151 +18,151 @@
       />
     </div>
 
-    <div class="field">
-      <label>Semester</label>
-      <select [(ngModel)]="semester" (change)="loadSemester()">
-        <option *ngFor="let s of semesters" [value]="s">
-          Semester {{ s }}
-        </option>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Semester</label>
+      <select
+        class="border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-sky-400 bg-white"
+        [(ngModel)]="semester"
+        (change)="loadSemester()"
+      >
+        <option *ngFor="let s of semesters" [value]="s">Semester {{ s }}</option>
       </select>
     </div>
 
-    <div class="field search-field">
-      <label>Search</label>
+    <div class="flex flex-col gap-1.5 flex-1 min-w-48">
+      <label class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Search</label>
       <input
+        class="border border-slate-300 rounded-xl px-3.5 py-2 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all"
         type="text"
         [(ngModel)]="search"
         placeholder="Search by code, title, or teacher..."
       />
     </div>
 
-    <button
-      class="btn-primary"
-      (click)="registerSelected()"
-      [disabled]="registrationLoading || !!registration"
-    >
-      Register
-    </button>
-
-    <button
-      class="btn-ghost"
-      (click)="clearRegistration()"
-      [disabled]="registrationLoading || !registration"
-    >
-      Clear
-    </button>
+    <div class="flex gap-2 self-end">
+      <button
+        class="bg-sky-500 hover:bg-sky-600 text-white border-0 rounded-xl px-5 py-2 text-sm font-bold cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="registerSelected()"
+        [disabled]="registrationLoading || !!registration"
+      >
+        Register
+      </button>
+      <button
+        class="bg-slate-100 hover:bg-slate-200 text-slate-700 border-0 rounded-xl px-5 py-2 text-sm font-semibold cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="clearRegistration()"
+        [disabled]="registrationLoading || !registration"
+      >
+        Clear
+      </button>
+    </div>
   </div>
 
-  <div class="alert error" *ngIf="error">
+  <!-- Alerts -->
+  <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4 text-sm" *ngIf="error">
     {{ error }}
   </div>
-
-  <div class="alert success" *ngIf="message">
+  <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4 text-sm" *ngIf="message">
     {{ message }}
   </div>
+  <div class="text-slate-400 text-sm mb-4" *ngIf="loading">Loading courses...</div>
+  <div class="text-slate-400 text-sm mb-4" *ngIf="registrationLoading">Processing registration...</div>
 
-  <div class="loading" *ngIf="loading">
-    Loading courses...
-  </div>
+  <!-- Two-column grid -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" *ngIf="!loading && !error">
 
-  <div class="loading" *ngIf="registrationLoading">
-    Processing registration...
-  </div>
+    <!-- Offered Courses -->
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="text-base font-bold text-slate-800 mb-4">Offered Courses</div>
 
-  <div class="grid" *ngIf="!loading && !error">
-    <div class="box">
-      <div class="box-title">Offered Courses</div>
-
-      <div class="hint" *ngIf="registration">
-        This student has already registered courses for this semester.
-        Clear it if you want to test again.
+      <div class="bg-amber-50 border border-amber-200 text-amber-700 rounded-xl px-4 py-3 mb-4 text-sm" *ngIf="registration">
+        This student has already registered for this semester. Clear it to register again.
       </div>
 
-      <div class="table-wrapper">
-        <table>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
           <thead>
-            <tr>
-              <th>Select</th>
-              <th>ID</th>
-              <th>Code</th>
-              <th>Title</th>
-              <th>Credits</th>
-              <th>Lecture</th>
-              <th>Lab</th>
-              <th>Teachers</th>
+            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+              <th class="text-left px-3 py-3 font-semibold w-10"></th>
+              <th class="text-left px-3 py-3 font-semibold">Code</th>
+              <th class="text-left px-3 py-3 font-semibold">Title</th>
+              <th class="text-left px-3 py-3 font-semibold">Credits</th>
+              <th class="text-left px-3 py-3 font-semibold">Lec</th>
+              <th class="text-left px-3 py-3 font-semibold">Lab</th>
+              <th class="text-left px-3 py-3 font-semibold">Teacher</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr *ngFor="let c of filteredCourses">
-              <td>
+            <tr *ngFor="let c of filteredCourses" class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+              <td class="px-3 py-2.5">
                 <input
                   type="checkbox"
+                  class="w-4 h-4 accent-sky-500 cursor-pointer"
                   [checked]="isSelected(c.id)"
                   [disabled]="!!registration"
                   (change)="toggleCourse(c.id, $any($event.target).checked)"
                 />
               </td>
-
-              <td class="mono">{{ c.id }}</td>
-              <td class="mono">{{ c.courseCode }}</td>
-              <td>{{ c.title }}</td>
-              <td>{{ c.credits }}</td>
-              <td>{{ c.lectureHours }}</td>
-              <td>{{ c.labHours }}</td>
-              <td>{{ c.teachers.join(', ') }}</td>
+              <td class="px-3 py-2.5 font-mono text-xs font-semibold text-slate-600">{{ c.courseCode }}</td>
+              <td class="px-3 py-2.5 text-slate-800">{{ c.title }}</td>
+              <td class="px-3 py-2.5 text-center text-slate-600">{{ c.credits }}</td>
+              <td class="px-3 py-2.5 text-center text-slate-400">{{ c.lectureHours }}</td>
+              <td class="px-3 py-2.5 text-center text-slate-400">{{ c.labHours }}</td>
+              <td class="px-3 py-2.5 text-slate-500 text-xs">{{ c.teachers.join(', ') }}</td>
             </tr>
-
             <tr *ngIf="filteredCourses.length === 0">
-              <td colspan="8" class="empty">
-                No courses found.
-              </td>
+              <td colspan="7" class="px-4 py-8 text-center text-slate-400">No courses found.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="hint">
-        You must select at least 4 courses before registering.
-      </div>
+      <p class="text-xs text-slate-400 mt-3">Select at least 4 courses before registering.</p>
     </div>
 
-    <div class="box">
-      <div class="box-title">Registered Courses</div>
+    <!-- Registered Courses -->
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="text-base font-bold text-slate-800 mb-4">Registered Courses</div>
 
-      <div *ngIf="!registration" class="muted">
+      <div *ngIf="!registration" class="py-10 text-center text-slate-400 text-sm">
         No registration found for this student and semester.
       </div>
 
-      <div *ngIf="registration" class="registration-info">
-        <div><strong>Reg Number:</strong> {{ registration.regNumber }}</div>
-        <div><strong>Semester:</strong> {{ registration.semester }}</div>
-        <div><strong>Saved at:</strong> {{ registration.createdAt }}</div>
+      <div *ngIf="registration" class="mb-4 bg-slate-50 rounded-xl border border-slate-200 px-4 py-3 text-sm flex flex-col gap-1.5">
+        <div>
+          <span class="font-semibold text-slate-700">Reg Number:</span>
+          <span class="text-slate-600 ml-1">{{ registration.regNumber }}</span>
+        </div>
+        <div>
+          <span class="font-semibold text-slate-700">Semester:</span>
+          <span class="text-slate-600 ml-1">{{ registration.semester }}</span>
+        </div>
+        <div>
+          <span class="font-semibold text-slate-700">Registered at:</span>
+          <span class="text-slate-600 ml-1">{{ registration.createdAt }}</span>
+        </div>
       </div>
 
-      <div *ngIf="registration" class="table-wrapper">
-        <table>
+      <div class="overflow-x-auto" *ngIf="registration">
+        <table class="w-full text-sm border-collapse">
           <thead>
-            <tr>
-              <th>ID</th>
-              <th>Code</th>
-              <th>Title</th>
-              <th>Credits</th>
-              <th>Teachers</th>
+            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+              <th class="text-left px-3 py-3 font-semibold">Code</th>
+              <th class="text-left px-3 py-3 font-semibold">Title</th>
+              <th class="text-left px-3 py-3 font-semibold">Credits</th>
+              <th class="text-left px-3 py-3 font-semibold">Teacher</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr *ngFor="let c of registeredCourses">
-              <td class="mono">{{ c.id }}</td>
-              <td class="mono">{{ c.courseCode }}</td>
-              <td>{{ c.title }}</td>
-              <td>{{ c.credits }}</td>
-              <td>{{ c.teachers.join(', ') }}</td>
+            <tr *ngFor="let c of registeredCourses" class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+              <td class="px-3 py-2.5 font-mono text-xs font-semibold text-slate-600">{{ c.courseCode }}</td>
+              <td class="px-3 py-2.5 text-slate-800">{{ c.title }}</td>
+              <td class="px-3 py-2.5 text-center text-slate-600">{{ c.credits }}</td>
+              <td class="px-3 py-2.5 text-slate-500 text-xs">{{ c.teachers.join(', ') }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+
   </div>
 </section>

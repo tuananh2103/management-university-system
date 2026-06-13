@@ -1,6 +1,6 @@
 @import "tailwindcss";
+@source "./app/**/*.{html,ts}";
 
-/* Global custom styles */
 * {
   box-sizing: border-box;
 }
