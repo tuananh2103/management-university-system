@@ -1,2 +1,5 @@
 [build]
-builder = "NIXPACKS"
+dockerfilePath = "BackEnd/Dockerfile"
+
+[deploy]
+startCommand = "java -jar app.jar"
