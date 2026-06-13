@@ -1,8 +1,10 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "./mvnw package -DskipTests -q"
+builder = "DOCKERFILE"
 
+# The image's ENTRYPOINT (java -jar app.jar) starts the app and EXPOSE 8080 sets the port.
+# No healthcheckPath: every /api/** route except POST /api/auth/login requires a JWT,
+# so an HTTP healthcheck would get 401 and be marked unhealthy. Railway falls back to
+# checking that the container stays running.
 [deploy]
-startCommand = "java -jar target/management-university-0.0.1-SNAPSHOT.jar"
-healthcheckPath = "/api/dashboard/summary"
-healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
