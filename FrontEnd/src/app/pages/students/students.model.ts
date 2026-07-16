@@ -3,6 +3,7 @@ export type StudentStatus = 'ACTIVE' | 'INACTIVE';
 export interface Student {
   id: number;
   studentCode: string;
+  regNumber: string;
   fullName: string;
   email: string;
   major: string;
@@ -12,6 +13,7 @@ export interface Student {
 
 export interface CreateStudent {
   studentCode: string;
+  regNumber: string;
   fullName: string;
   email: string;
   major: string;
@@ -21,6 +23,7 @@ export interface CreateStudent {
 
 export interface UpdateStudent {
   studentCode: string;
+  regNumber: string;
   fullName: string;
   email: string;
   major: string;

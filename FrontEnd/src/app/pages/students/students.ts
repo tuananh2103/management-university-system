@@ -34,6 +34,7 @@ export class StudentsComponent implements OnInit {
 
   form: CreateStudent = {
     studentCode: '',
+    regNumber: '',
     fullName: '',
     email: '',
     major: 'Computer Science',
@@ -147,6 +148,7 @@ export class StudentsComponent implements OnInit {
 
     this.form = {
       studentCode: student.studentCode,
+      regNumber: student.regNumber,
       fullName: student.fullName,
       email: student.email,
       major: student.major,
@@ -185,6 +187,7 @@ export class StudentsComponent implements OnInit {
 
     this.form = {
       studentCode: '',
+      regNumber: '',
       fullName: '',
       email: '',
       major: 'Computer Science',
@@ -203,6 +206,7 @@ export class StudentsComponent implements OnInit {
     return this.students.filter((student) => {
       return (
         student.studentCode.toLowerCase().includes(q) ||
+        student.regNumber.toLowerCase().includes(q) ||
         student.fullName.toLowerCase().includes(q) ||
         student.email.toLowerCase().includes(q) ||
         student.major.toLowerCase().includes(q) ||

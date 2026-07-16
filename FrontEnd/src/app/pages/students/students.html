@@ -18,6 +18,11 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-semibold text-slate-700">Reg Number</label>
+          <input class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all" type="text" name="regNumber" [(ngModel)]="form.regNumber" placeholder="Example: SP21-BCS-066" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
           <label class="text-sm font-semibold text-slate-700">Full Name</label>
           <input class="border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all" type="text" name="fullName" [(ngModel)]="form.fullName" placeholder="Student full name" />
         </div>
@@ -79,6 +84,7 @@
             <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
               <th class="text-left px-4 py-3 font-semibold">ID</th>
               <th class="text-left px-4 py-3 font-semibold">Code</th>
+              <th class="text-left px-4 py-3 font-semibold">Reg Number</th>
               <th class="text-left px-4 py-3 font-semibold">Full Name</th>
               <th class="text-left px-4 py-3 font-semibold">Email</th>
               <th class="text-left px-4 py-3 font-semibold">Major</th>
@@ -91,6 +97,7 @@
             <tr *ngFor="let student of filteredStudents" class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
               <td class="px-4 py-3 font-mono text-slate-400">{{ student.id }}</td>
               <td class="px-4 py-3 font-mono font-semibold text-slate-700">{{ student.studentCode }}</td>
+              <td class="px-4 py-3 font-mono text-slate-600">{{ student.regNumber }}</td>
               <td class="px-4 py-3 font-semibold text-slate-800">{{ student.fullName }}</td>
               <td class="px-4 py-3 text-slate-500">{{ student.email }}</td>
               <td class="px-4 py-3 text-slate-600">{{ student.major }}</td>
@@ -110,7 +117,7 @@
             </tr>
 
             <tr *ngIf="filteredStudents.length === 0">
-              <td colspan="8" class="px-4 py-8 text-center text-slate-400">No students found.</td>
+              <td colspan="9" class="px-4 py-8 text-center text-slate-400">No students found.</td>
             </tr>
           </tbody>
         </table>
