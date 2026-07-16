@@ -14,6 +14,9 @@ public class Student {
     @Column(name = "student_code", unique = true, nullable = false, length = 20)
     private String studentCode;
 
+    @Column(name = "reg_number", unique = true, nullable = false, length = 50)
+    private String regNumber;
+
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
@@ -36,6 +39,7 @@ public class Student {
 
     public Long getId() { return id; }
     public String getStudentCode() { return studentCode; }
+    public String getRegNumber() { return regNumber; }
     public String getFullName() { return fullName; }
     public String getEmail() { return email; }
     public String getMajor() { return major; }
@@ -43,6 +47,7 @@ public class Student {
     public String getStatus() { return status; }
 
     public void setStudentCode(String studentCode) { this.studentCode = studentCode; }
+    public void setRegNumber(String regNumber) { this.regNumber = regNumber; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public void setEmail(String email) { this.email = email; }
     public void setMajor(String major) { this.major = major; }

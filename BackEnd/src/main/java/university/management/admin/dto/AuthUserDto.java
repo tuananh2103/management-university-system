@@ -4,6 +4,7 @@ public record AuthUserDto(
         Long id,
         String username,
         String fullName,
-        String role
+        String role,
+        String studentRegNumber
 ) {
 }

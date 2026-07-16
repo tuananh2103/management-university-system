@@ -41,6 +41,7 @@ public class StudentService {
         validateCreate(request);
         Student student = new Student();
         student.setStudentCode(request.studentCode());
+        student.setRegNumber(request.regNumber());
         student.setFullName(request.fullName());
         student.setEmail(request.email());
         student.setMajor(request.major());
@@ -61,8 +62,12 @@ public class StudentService {
         if (studentRepository.existsByEmailAndIdNot(request.email(), id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
+        if (studentRepository.existsByRegNumberAndIdNot(request.regNumber(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Registration number already in use");
+        }
 
         student.setStudentCode(request.studentCode());
+        student.setRegNumber(request.regNumber());
         student.setFullName(request.fullName());
         student.setEmail(request.email());
         student.setMajor(request.major());
@@ -84,12 +89,16 @@ public class StudentService {
     private void validateCreate(CreateStudent request) {
         if (request.studentCode() == null || request.studentCode().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student code is required");
+        if (request.regNumber() == null || request.regNumber().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration number is required");
         if (request.fullName() == null || request.fullName().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full name is required");
         if (request.email() == null || request.email().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
         if (studentRepository.existsByStudentCode(request.studentCode()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Student code already exists");
+        if (studentRepository.existsByRegNumber(request.regNumber()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Registration number already exists");
         if (studentRepository.existsByEmail(request.email()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
     }
@@ -97,6 +106,8 @@ public class StudentService {
     private void validateUpdate(UpdateStudent request) {
         if (request.studentCode() == null || request.studentCode().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student code is required");
+        if (request.regNumber() == null || request.regNumber().isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration number is required");
         if (request.fullName() == null || request.fullName().isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full name is required");
         if (request.email() == null || request.email().isBlank())
@@ -104,7 +115,7 @@ public class StudentService {
     }
 
     private StudentDto toDto(Student s) {
-        return new StudentDto(s.getId(), s.getStudentCode(), s.getFullName(),
+        return new StudentDto(s.getId(), s.getStudentCode(), s.getRegNumber(), s.getFullName(),
                 s.getEmail(), s.getMajor(), s.getYear(), s.getStatus());
     }
 }

@@ -3,6 +3,7 @@ package university.management.admin.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import university.management.admin.dto.AuthUserDto;
 import university.management.admin.dto.LoginRequest;
@@ -12,6 +13,7 @@ import university.management.admin.repository.AdminUserRepository;
 import university.management.admin.security.JwtService;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final AdminUserRepository adminUserRepository;
@@ -38,7 +40,8 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user);
-        AuthUserDto userDto = new AuthUserDto(user.getId(), user.getUsername(), user.getFullName(), user.getRole());
+        String studentRegNumber = user.getStudent() != null ? user.getStudent().getRegNumber() : null;
+        AuthUserDto userDto = new AuthUserDto(user.getId(), user.getUsername(), user.getFullName(), user.getRole(), studentRegNumber);
         return new LoginResponse(token, userDto);
     }
 }

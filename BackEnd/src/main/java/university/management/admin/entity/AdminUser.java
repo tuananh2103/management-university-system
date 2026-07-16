@@ -1,6 +1,8 @@
 package university.management.admin.entity;
 
 import jakarta.persistence.*;
+import university.management.students.entity.Student;
+
 import java.time.Instant;
 
 @Entity
@@ -23,6 +25,10 @@ public class AdminUser {
     @Column(nullable = false, length = 20)
     private String role = "ADMIN";
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id")
+    private Student student;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
@@ -40,6 +46,8 @@ public class AdminUser {
     public String getPassword() { return password; }
     public String getFullName() { return fullName; }
     public String getRole() { return role; }
+    public Student getStudent() { return student; }
     public Instant getCreatedAt() { return createdAt; }
     public void setPassword(String password) { this.password = password; }
+    public void setStudent(Student student) { this.student = student; }
 }

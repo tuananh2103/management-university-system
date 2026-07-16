@@ -8,7 +8,6 @@ import university.management.courses.dto.CourseDto;
 import university.management.courses.entity.Course;
 import university.management.courses.repository.CourseRepository;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -38,8 +37,8 @@ public class CourseService {
     }
 
     public CourseDto toDto(Course c) {
-        List<String> teachers = c.getTeachers() != null
-                ? Arrays.asList(c.getTeachers().split(","))
+        List<String> teachers = c.getTeacher() != null
+                ? List.of(c.getTeacher().getFullName())
                 : List.of("HYBRID");
         return new CourseDto(
                 c.getId().intValue(),

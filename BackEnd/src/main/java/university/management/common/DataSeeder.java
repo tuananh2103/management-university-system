@@ -10,7 +10,9 @@ import university.management.admin.repository.AdminUserRepository;
 import university.management.cafe.entity.CafeteriaItem;
 import university.management.cafe.repository.CafeteriaItemRepository;
 import university.management.courses.entity.Course;
+import university.management.courses.entity.Teacher;
 import university.management.courses.repository.CourseRepository;
+import university.management.courses.repository.TeacherRepository;
 import university.management.library.entity.Book;
 import university.management.library.repository.BookRepository;
 import university.management.students.entity.Student;
@@ -30,6 +32,7 @@ public class DataSeeder implements ApplicationRunner {
     private final BookRepository bookRepository;
     private final CafeteriaItemRepository cafeteriaItemRepository;
     private final CourseRepository courseRepository;
+    private final TeacherRepository teacherRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataSeeder(AdminUserRepository adminUserRepository,
@@ -37,50 +40,54 @@ public class DataSeeder implements ApplicationRunner {
                       BookRepository bookRepository,
                       CafeteriaItemRepository cafeteriaItemRepository,
                       CourseRepository courseRepository,
+                      TeacherRepository teacherRepository,
                       PasswordEncoder passwordEncoder) {
         this.adminUserRepository = adminUserRepository;
         this.studentRepository = studentRepository;
         this.bookRepository = bookRepository;
         this.cafeteriaItemRepository = cafeteriaItemRepository;
         this.courseRepository = courseRepository;
+        this.teacherRepository = teacherRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        seedAdminUsers();
-        seedStudents();
+        List<Student> students = seedStudents();
+        seedAdminUsers(students.isEmpty() ? null : students.get(0));
         seedBooks();
         seedCafeteriaItems();
         seedCourses();
     }
 
-    private void seedAdminUsers() {
+    private void seedAdminUsers(Student demoStudent) {
         if (adminUserRepository.count() > 0) return;
+        AdminUser studentUser = new AdminUser("student", passwordEncoder.encode("student123"), "Demo Student", "STUDENT");
+        studentUser.setStudent(demoStudent);
         adminUserRepository.saveAll(List.of(
                 new AdminUser("admin", passwordEncoder.encode("admin123"), "System Administrator", "ADMIN"),
-                new AdminUser("student", passwordEncoder.encode("student123"), "Demo Student", "STUDENT")
+                studentUser
         ));
     }
 
-    private void seedStudents() {
-        if (studentRepository.count() > 0) return;
+    private List<Student> seedStudents() {
+        if (studentRepository.count() > 0) return studentRepository.findAll();
         Student s1 = new Student();
-        s1.setStudentCode("STU001"); s1.setFullName("Nguyen Van An");
+        s1.setStudentCode("STU001"); s1.setRegNumber("SP21-BCS-066"); s1.setFullName("Nguyen Van An");
         s1.setEmail("an.nguyen@university.com"); s1.setMajor("Computer Science");
         s1.setYear(1); s1.setStatus("ACTIVE");
 
         Student s2 = new Student();
-        s2.setStudentCode("STU002"); s2.setFullName("Tran Thi Binh");
+        s2.setStudentCode("STU002"); s2.setRegNumber("SP21-BCS-067"); s2.setFullName("Tran Thi Binh");
         s2.setEmail("binh.tran@university.com"); s2.setMajor("Software Engineering");
         s2.setYear(2); s2.setStatus("ACTIVE");
 
         Student s3 = new Student();
-        s3.setStudentCode("STU003"); s3.setFullName("Le Minh Chau");
+        s3.setStudentCode("STU003"); s3.setRegNumber("SP21-SE-014"); s3.setFullName("Le Minh Chau");
         s3.setEmail("chau.le@university.com"); s3.setMajor("Information Systems");
         s3.setYear(3); s3.setStatus("INACTIVE");
 
-        studentRepository.saveAll(List.of(s1, s2, s3));
+        return studentRepository.saveAll(List.of(s1, s2, s3));
     }
 
     private void seedBooks() {
@@ -141,7 +148,7 @@ public class DataSeeder implements ApplicationRunner {
 
                 String title = parts[1].trim();
                 String creditPart = parts[2].trim();
-                String teacher = parts.length > 3 ? parts[3].trim() : "HYBRID";
+                String teacherName = parts.length > 3 ? parts[3].trim() : "HYBRID";
 
                 int credits = 0, lectureHours = 0, labHours = 0;
                 try {
@@ -161,7 +168,11 @@ public class DataSeeder implements ApplicationRunner {
                 course.setCredits(credits);
                 course.setLectureHours(lectureHours);
                 course.setLabHours(labHours);
-                course.setTeachers(teacher);
+                if (!"HYBRID".equalsIgnoreCase(teacherName)) {
+                    Teacher teacher = teacherRepository.findByFullName(teacherName)
+                            .orElseGet(() -> teacherRepository.save(new Teacher(teacherName)));
+                    course.setTeacher(teacher);
+                }
                 course.setSemester(semester);
                 courseRepository.save(course);
             }

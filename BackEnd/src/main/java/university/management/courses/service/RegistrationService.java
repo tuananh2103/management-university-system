@@ -6,13 +6,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import university.management.courses.dto.RegisterRequest;
 import university.management.courses.dto.RegistrationDto;
-import university.management.courses.entity.CourseRegistration;
-import university.management.courses.repository.CourseRegistrationRepository;
+import university.management.courses.entity.Course;
+import university.management.courses.entity.Registration;
 import university.management.courses.repository.CourseRepository;
+import university.management.courses.repository.RegistrationRepository;
+import university.management.students.entity.Student;
+import university.management.students.repository.StudentRepository;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,46 +23,62 @@ import java.util.stream.Collectors;
 @Transactional
 public class RegistrationService {
 
-    private final CourseRegistrationRepository registrationRepository;
+    private final RegistrationRepository registrationRepository;
     private final CourseRepository courseRepository;
+    private final StudentRepository studentRepository;
 
-    public RegistrationService(CourseRegistrationRepository registrationRepository, CourseRepository courseRepository) {
+    public RegistrationService(RegistrationRepository registrationRepository,
+                                CourseRepository courseRepository,
+                                StudentRepository studentRepository) {
         this.registrationRepository = registrationRepository;
         this.courseRepository = courseRepository;
+        this.studentRepository = studentRepository;
     }
 
     public RegistrationDto register(RegisterRequest request) {
         validateRequest(request);
 
-        if (registrationRepository.existsByRegNumberAndSemester(request.regNumber(), request.semester())) {
+        Student student = findStudentOrThrow(request.regNumber());
+
+        if (registrationRepository.existsByStudentAndSemester(student, request.semester())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Student already registered courses for this semester");
         }
 
-        validateCourseIds(request.semester(), request.courseIds());
+        List<Course> courses = resolveCourses(request.semester(), request.courseIds());
 
-        CourseRegistration reg = new CourseRegistration();
-        reg.setRegNumber(request.regNumber());
+        Registration reg = new Registration();
+        reg.setStudent(student);
         reg.setSemester(request.semester());
-        reg.setCourseIds(request.courseIds().stream().map(Long::valueOf).collect(Collectors.toList()));
+        for (Course course : courses) {
+            reg.addItem(course);
+        }
 
-        CourseRegistration saved = registrationRepository.save(reg);
+        Registration saved = registrationRepository.save(reg);
         return toDto(saved);
     }
 
     @Transactional(readOnly = true)
     public RegistrationDto getRegistration(String regNumber, int semester) {
-        return registrationRepository.findByRegNumberAndSemester(regNumber, semester)
+        Student student = findStudentOrThrow(regNumber);
+        return registrationRepository.findByStudentAndSemester(student, semester)
                 .map(this::toDto)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No registration found for this student and semester"));
     }
 
     public void deleteRegistration(String regNumber, int semester) {
-        CourseRegistration reg = registrationRepository.findByRegNumberAndSemester(regNumber, semester)
+        Student student = findStudentOrThrow(regNumber);
+        Registration reg = registrationRepository.findByStudentAndSemester(student, semester)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No registration found for this student and semester"));
         registrationRepository.delete(reg);
+    }
+
+    private Student findStudentOrThrow(String regNumber) {
+        return studentRepository.findByRegNumber(regNumber)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No student found with registration number: " + regNumber));
     }
 
     private void validateRequest(RegisterRequest request) {
@@ -77,23 +96,27 @@ public class RegistrationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate course IDs are not allowed");
     }
 
-    private void validateCourseIds(int semester, List<Integer> courseIds) {
-        Set<Long> offeredIds = courseRepository.findBySemester(semester)
-                .stream().map(c -> c.getId()).collect(Collectors.toSet());
+    private List<Course> resolveCourses(int semester, List<Integer> courseIds) {
+        Map<Long, Course> offeredById = courseRepository.findBySemester(semester).stream()
+                .collect(Collectors.toMap(Course::getId, c -> c));
 
-        for (Integer id : courseIds) {
-            if (!offeredIds.contains(Long.valueOf(id))) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid course id: " + id);
-            }
-        }
+        return courseIds.stream()
+                .map(id -> {
+                    Course course = offeredById.get(Long.valueOf(id));
+                    if (course == null) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid course id: " + id);
+                    }
+                    return course;
+                })
+                .toList();
     }
 
-    private RegistrationDto toDto(CourseRegistration reg) {
-        List<Integer> courseIds = reg.getCourseIds().stream()
-                .map(Long::intValue)
-                .collect(Collectors.toList());
+    private RegistrationDto toDto(Registration reg) {
+        List<Integer> courseIds = reg.getItems().stream()
+                .map(item -> item.getCourse().getId().intValue())
+                .toList();
         return new RegistrationDto(
-                reg.getRegNumber(),
+                reg.getStudent().getRegNumber(),
                 reg.getSemester(),
                 courseIds,
                 reg.getRegisteredAt().toString()

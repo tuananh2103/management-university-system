@@ -26,8 +26,9 @@ public class Course {
     @Column(name = "lab_hours", nullable = false)
     private int labHours;
 
-    @Column(columnDefinition = "TEXT")
-    private String teachers;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id")
+    private Teacher teacher;
 
     @Column(nullable = false)
     private int semester;
@@ -43,7 +44,7 @@ public class Course {
     public int getCredits() { return credits; }
     public int getLectureHours() { return lectureHours; }
     public int getLabHours() { return labHours; }
-    public String getTeachers() { return teachers; }
+    public Teacher getTeacher() { return teacher; }
     public int getSemester() { return semester; }
 
     public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
@@ -51,6 +52,6 @@ public class Course {
     public void setCredits(int credits) { this.credits = credits; }
     public void setLectureHours(int lectureHours) { this.lectureHours = lectureHours; }
     public void setLabHours(int labHours) { this.labHours = labHours; }
-    public void setTeachers(String teachers) { this.teachers = teachers; }
+    public void setTeacher(Teacher teacher) { this.teacher = teacher; }
     public void setSemester(int semester) { this.semester = semester; }
 }
