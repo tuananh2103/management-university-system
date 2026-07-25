@@ -36,7 +36,6 @@ public class CafeteriaService {
     }
 
     public CafeteriaItemDto createItem(CreateCafeteriaItem request) {
-        validateCreate(request);
         CafeteriaItem item = new CafeteriaItem();
         item.setName(request.name());
         item.setCategory(request.category());
@@ -47,7 +46,6 @@ public class CafeteriaService {
     }
 
     public CafeteriaItemDto updateItem(Long id, UpdateCafeteriaItem request) {
-        validateUpdate(request);
         CafeteriaItem item = cafeteriaItemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cafeteria item not found with id: " + id));
         item.setName(request.name());
@@ -67,24 +65,6 @@ public class CafeteriaService {
 
     public long countAll() { return cafeteriaItemRepository.count(); }
     public long countByStatus(String status) { return cafeteriaItemRepository.countByStatus(status); }
-
-    private void validateCreate(CreateCafeteriaItem request) {
-        if (request.name() == null || request.name().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item name is required");
-        if (request.category() == null || request.category().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category is required");
-        if (request.price() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price cannot be negative");
-    }
-
-    private void validateUpdate(UpdateCafeteriaItem request) {
-        if (request.name() == null || request.name().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item name is required");
-        if (request.category() == null || request.category().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category is required");
-        if (request.price() < 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price cannot be negative");
-    }
 
     private CafeteriaItemDto toDto(CafeteriaItem i) {
         return new CafeteriaItemDto(i.getId(), i.getName(), i.getCategory(),

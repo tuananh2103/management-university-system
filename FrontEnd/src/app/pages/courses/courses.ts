@@ -16,6 +16,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Course, CourseRegistration } from './courses.model';
 import { CoursesApiService } from './courses.api.service';
 import { RegistrationsApiService } from './registrations.api.service';
+import { AuthSessionService } from '../login/admin.service';
+
 
 @Component({
   selector: 'app-courses',
@@ -25,7 +27,7 @@ import { RegistrationsApiService } from './registrations.api.service';
   styleUrl: './courses.scss',
 })
 export class CoursesComponent implements OnInit {
-  regNumber = 'SP21-BCS-066';
+  regNumber = '';
 
   semester = 1;
   semesters = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -46,10 +48,13 @@ export class CoursesComponent implements OnInit {
   constructor(
     private coursesApi: CoursesApiService,
     private registrationsApi: RegistrationsApiService,
+    private authSession: AuthSessionService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    const currentUser = this.authSession.getUser();
+    this.regNumber = currentUser?.studentRegNumber ?? '';
     this.loadSemester();
   }
 

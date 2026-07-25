@@ -87,14 +87,6 @@ public class StudentService {
     public long countByStatus(String status) { return studentRepository.countByStatus(status); }
 
     private void validateCreate(CreateStudent request) {
-        if (request.studentCode() == null || request.studentCode().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student code is required");
-        if (request.regNumber() == null || request.regNumber().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration number is required");
-        if (request.fullName() == null || request.fullName().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full name is required");
-        if (request.email() == null || request.email().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
         if (studentRepository.existsByStudentCode(request.studentCode()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Student code already exists");
         if (studentRepository.existsByRegNumber(request.regNumber()))

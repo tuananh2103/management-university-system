@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import university.management.admin.dto.LoginRequest;
 import university.management.admin.dto.LoginResponse;
 import university.management.admin.service.AuthService;
@@ -20,7 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid@RequestBody LoginRequest request) {
         return authService.login(request);
     }
 }

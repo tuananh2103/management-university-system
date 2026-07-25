@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import university.management.cafe.dto.CafeteriaItemDto;
 import university.management.cafe.dto.CreateCafeteriaItem;
 import university.management.cafe.dto.UpdateCafeteriaItem;
@@ -42,7 +43,7 @@ public class CafeteriaController {
 
     @PostMapping
     public ResponseEntity<CafeteriaItemDto> createItem(
-            @RequestBody CreateCafeteriaItem request
+            @Valid @RequestBody CreateCafeteriaItem request
     ) {
         CafeteriaItemDto createdItem = cafeteriaService.createItem(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
@@ -51,7 +52,7 @@ public class CafeteriaController {
     @PutMapping("/{id}")
     public CafeteriaItemDto updateItem(
             @PathVariable Long id,
-            @RequestBody UpdateCafeteriaItem request
+            @Valid@RequestBody UpdateCafeteriaItem request
     ) {
         return cafeteriaService.updateItem(id, request);
     }

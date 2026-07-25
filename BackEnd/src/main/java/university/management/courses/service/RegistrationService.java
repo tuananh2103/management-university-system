@@ -82,15 +82,6 @@ public class RegistrationService {
     }
 
     private void validateRequest(RegisterRequest request) {
-        if (request.regNumber() == null || request.regNumber().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration number is required");
-        if (request.semester() < 1 || request.semester() > 8)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Semester must be between 1 and 8");
-        if (request.courseIds() == null || request.courseIds().isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course IDs are required");
-        if (request.courseIds().size() < 4)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must register at least 4 courses");
-
         Set<Integer> uniqueIds = new HashSet<>(request.courseIds());
         if (uniqueIds.size() != request.courseIds().size())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate course IDs are not allowed");

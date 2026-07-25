@@ -30,19 +30,27 @@
 		<java.version>25</java.version>
 	</properties>
 	<dependencies>
+		<!-- Hibernate Validator -->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<!-- Spring Data JPA + Hibernate -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+		<!-- It bundles Spring MVC, an embedded Tomcat server, and Jackson for JSON serialization. This needs to be fixed or the build will fail. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
+		<!-- Spring Security -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-
+		<!-- The public API of the jjwt library (io.jsonwebtoken) -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>

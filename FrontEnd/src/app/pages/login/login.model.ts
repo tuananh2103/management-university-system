@@ -8,6 +8,7 @@ export interface AuthUser {
   username: string;
   fullName: string;
   role: string;
+  studentRegNumber: string | null;
 }
 
 export interface LoginResponse {
