@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +41,7 @@ public class CafeteriaController {
     public CafeteriaItemDto getItemById(@PathVariable Long id) {
         return cafeteriaService.getItemById(id);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CafeteriaItemDto> createItem(
             @Valid @RequestBody CreateCafeteriaItem request
@@ -48,7 +49,7 @@ public class CafeteriaController {
         CafeteriaItemDto createdItem = cafeteriaService.createItem(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public CafeteriaItemDto updateItem(
             @PathVariable Long id,
@@ -56,7 +57,7 @@ public class CafeteriaController {
     ) {
         return cafeteriaService.updateItem(id, request);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
         cafeteriaService.deleteItem(id);

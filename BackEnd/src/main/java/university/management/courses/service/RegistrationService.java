@@ -12,6 +12,9 @@ import university.management.courses.repository.CourseRepository;
 import university.management.courses.repository.RegistrationRepository;
 import university.management.students.entity.Student;
 import university.management.students.repository.StudentRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
+import university.management.admin.entity.AdminUser;
+import university.management.admin.repository.AdminUserRepository;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,16 +29,20 @@ public class RegistrationService {
     private final RegistrationRepository registrationRepository;
     private final CourseRepository courseRepository;
     private final StudentRepository studentRepository;
+    private final AdminUserRepository adminUserRepository;
 
     public RegistrationService(RegistrationRepository registrationRepository,
                                 CourseRepository courseRepository,
-                                StudentRepository studentRepository) {
+                                StudentRepository studentRepository,
+                                AdminUserRepository adminUserRepository) {
         this.registrationRepository = registrationRepository;
         this.courseRepository = courseRepository;
         this.studentRepository = studentRepository;
+        this.adminUserRepository = adminUserRepository;
     }
 
     public RegistrationDto register(RegisterRequest request) {
+        authorizeAccess(request.regNumber());
         validateRequest(request);
 
         Student student = findStudentOrThrow(request.regNumber());
@@ -60,7 +67,9 @@ public class RegistrationService {
 
     @Transactional(readOnly = true)
     public RegistrationDto getRegistration(String regNumber, int semester) {
+        authorizeAccess(regNumber);
         Student student = findStudentOrThrow(regNumber);
+        
         return registrationRepository.findByStudentAndSemester(student, semester)
                 .map(this::toDto)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -68,7 +77,9 @@ public class RegistrationService {
     }
 
     public void deleteRegistration(String regNumber, int semester) {
+        authorizeAccess(regNumber);
         Student student = findStudentOrThrow(regNumber);
+
         Registration reg = registrationRepository.findByStudentAndSemester(student, semester)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No registration found for this student and semester"));
@@ -113,4 +124,22 @@ public class RegistrationService {
                 reg.getRegisteredAt().toString()
         );
     }
+
+    private void authorizeAccess(String regNumber) {
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    AdminUser currentUser = adminUserRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+    if ("ADMIN".equals(currentUser.getRole())) {
+        return;
+    }
+
+    boolean isOwnRegNumber = currentUser.getStudent() != null
+            && currentUser.getStudent().getRegNumber().equals(regNumber);
+
+    if (!isOwnRegNumber) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "You can only manage your own course registration");
+    }
+}
 }

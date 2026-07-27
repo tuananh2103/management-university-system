@@ -9,7 +9,7 @@ import university.management.students.dto.StudentDto;
 import university.management.students.dto.UpdateStudent;
 import university.management.students.entity.Student;
 import university.management.students.repository.StudentRepository;
-
+import org.springframework.dao.DataIntegrityViolationException;
 import java.util.List;
 
 @Service
@@ -55,7 +55,6 @@ public class StudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Student not found with id: " + id));
-
         if (studentRepository.existsByStudentCodeAndIdNot(request.studentCode(), id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Student code already in use");
         }
@@ -80,7 +79,13 @@ public class StudentService {
         if (!studentRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found with id: " + id);
         }
-        studentRepository.deleteById(id);
+        try {
+            studentRepository.deleteById(id);
+            studentRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Cannot delete this student because it is still referenced by other records (e.g. a login account or course registrations).");
+        }
     }
 
     public long countAll() { return studentRepository.count(); }

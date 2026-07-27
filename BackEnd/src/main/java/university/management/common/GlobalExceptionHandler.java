@@ -6,12 +6,13 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.dao.DataIntegrityViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
@@ -46,18 +47,18 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(status).body(body);
     }
- @ExceptionHandler(Exception.class)
+ @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleGeneric(
-            Exception ex, HttpServletRequest request) {
+            DataIntegrityViolationException ex, HttpServletRequest request) {
 
         ApiError body = new ApiError(
                 Instant.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
-                "Something went wrong. Please try again later.",
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                "This action conflicts with existing related data.",
                 request.getRequestURI(),
                 null
         );
-        return ResponseEntity.internalServerError().body(body);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 }
