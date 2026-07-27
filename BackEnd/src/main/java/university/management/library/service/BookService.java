@@ -75,12 +75,7 @@ public class BookService {
     public long countByStatus(String status) { return bookRepository.countByStatus(status); }
 
     private void validateCreate(CreateBook request) {
-        if (request.isbn() == null || request.isbn().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN is required");
-        if (request.title() == null || request.title().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required");
-        if (request.author() == null || request.author().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Author is required");
+
         if (bookRepository.existsByIsbn(request.isbn()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "ISBN already exists");
     }
